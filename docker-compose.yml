@@ -1,0 +1,200 @@
+
+version: '3.8'
+
+services:
+  # MongoDB para Auth Service
+  mongodb-auth:
+    image: mongo:7.0
+    container_name: fitmanager_mongodb_auth
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_auth_data:/data/db
+    networks:
+      - fitmanager_network
+
+  # MongoDB para Routine Service
+  mongodb-routine:
+    image: mongo:7.0
+    container_name: fitmanager_mongodb_routine
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongodb_routine_data:/data/db
+    networks:
+      - fitmanager_network
+
+  # MongoDB para Chat Service
+  mongodb-chat:
+    image: mongo:7.0
+    container_name: fitmanager_mongodb_chat
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+    ports:
+      - "27019:27017"
+    volumes:
+      - mongodb_chat_data:/data/db
+    networks:
+      - fitmanager_network
+
+  # MongoDB para Stats Service
+  mongodb-stats:
+    image: mongo:7.0
+    container_name: fitmanager_mongodb_stats
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+    ports:
+      - "27020:27017"
+    volumes:
+      - mongodb_stats_data:/data/db
+    networks:
+      - fitmanager_network
+
+  # API Gateway
+  api-gateway:
+    build: ./backend/api-gateway
+    container_name: fitmanager_api_gateway
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=development
+      - PORT=8080
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - ROUTINE_SERVICE_URL=http://routine-service:3002
+      - CHAT_SERVICE_URL=http://chat-service:3003
+      - STATS_SERVICE_URL=http://stats-service:3004
+    depends_on:
+      - auth-service
+      - routine-service
+      - chat-service
+      - stats-service
+    networks:
+      - fitmanager_network
+
+
+  # Authentication Service
+  auth-service:
+    build: ./backend/auth-service
+    container_name: fitmanager_auth_service
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - MONGODB_URI=mongodb://admin:password123@mongodb-auth:27017/fitmanager_auth?authSource=admin
+      - JWT_SECRET=your-super-secret-jwt-key-here
+      - JWT_EXPIRES_IN=24h
+    depends_on:
+      - mongodb-auth
+    networks:
+      - fitmanager_network
+
+
+  # Routine Service
+  routine-service:
+    build: ./backend/routine-service
+    container_name: fitmanager_routine_service
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=development
+      - PORT=3002
+      - MONGODB_URI=mongodb://admin:password123@mongodb-routine:27017/fitmanager_routines?authSource=admin
+      - JWT_SECRET=your-super-secret-jwt-key-here
+    depends_on:
+      - mongodb-routine
+    networks:
+      - fitmanager_network
+
+
+  # Chat Service
+  chat-service:
+    build: ./backend/chat-service
+    container_name: fitmanager_chat_service
+    restart: unless-stopped
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=development
+      - PORT=3003
+      - MONGODB_URI=mongodb://admin:password123@mongodb-chat:27017/fitmanager_chat?authSource=admin
+      - JWT_SECRET=your-super-secret-jwt-key-here
+    depends_on:
+      - mongodb-chat
+    networks:
+      - fitmanager_network
+
+
+  # Stats Service
+  stats-service:
+    build: ./backend/stats-service
+    container_name: fitmanager_stats_service
+    restart: unless-stopped
+    ports:
+      - "3004:3004"
+    environment:
+      - NODE_ENV=development
+      - PORT=3004
+      - MONGODB_URI=mongodb://admin:password123@mongodb-stats:27017/fitmanager_stats?authSource=admin
+      - JWT_SECRET=your-super-secret-jwt-key-here
+    depends_on:
+      - mongodb-stats
+    networks:
+      - fitmanager_network
+
+  # Frontend React App
+  frontend:
+    build: ./frontend
+    container_name: fitmanager_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8080
+      - REACT_APP_SOCKET_URL=http://localhost:3003
+    depends_on:
+      - api-gateway
+    networks:
+      - fitmanager_network
+
+
+  # NGINX Load Balancer (Optional)
+  nginx:
+    image: nginx:alpine
+    container_name: fitmanager_nginx
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - frontend
+      - api-gateway
+    networks:
+      - fitmanager_network
+
+
+volumes:
+  mongodb_auth_data:
+  mongodb_routine_data:
+  mongodb_chat_data:
+  mongodb_stats_data:
+
+networks:
+  fitmanager_network:
+    driver: bridge
