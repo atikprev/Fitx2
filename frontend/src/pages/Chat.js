@@ -23,10 +23,7 @@ import {
   Zoom,
   Alert,
   Skeleton,
-<<<<<<< HEAD
   Container,
-=======
->>>>>>> db0320c747643e8c43ed007d522d2e3fd0e44dfe
 } from '@mui/material';
 import { 
   Send, 
