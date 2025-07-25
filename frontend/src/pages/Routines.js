@@ -21,6 +21,10 @@ import {
   MenuItem,
   IconButton,
   Fab,
+  Fade,
+  Zoom,
+  Avatar,
+  Skeleton,
 } from '@mui/material';
 import {
   Add,
@@ -30,6 +34,10 @@ import {
   FitnessCenter,
   AccessTime,
   TrendingUp,
+  SportsMartialArts,
+  Timer,
+  Group,
+  Visibility,
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
@@ -227,6 +235,19 @@ const Routines = () => {
     return colors[category] || 'default';
   };
 
+  const getCategoryGradient = (category) => {
+    const gradients = {
+      strength: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+      cardio: 'linear-gradient(135deg, #9c27b0 0%, #ba68c8 100%)',
+      flexibility: 'linear-gradient(135deg, #388e3c 0%, #66bb6a 100%)',
+      sports: 'linear-gradient(135deg, #f57c00 0%, #ffb74d 100%)',
+      rehabilitation: 'linear-gradient(135deg, #0288d1 0%, #4fc3f7 100%)',
+      weight_loss: 'linear-gradient(135deg, #d32f2f 0%, #f44336 100%)',
+      muscle_gain: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+    };
+    return gradients[category] || 'linear-gradient(135deg, #666 0%, #999 100%)';
+  };
+
   const getDifficultyColor = (difficulty) => {
     const colors = {
       beginner: 'success',
@@ -236,120 +257,267 @@ const Routines = () => {
     return colors[difficulty] || 'default';
   };
 
-  const RoutineCard = ({ routine }) => (
+  const getCategoryIcon = (category) => {
+    const icons = {
+      strength: <FitnessCenter />,
+      cardio: <TrendingUp />,
+      flexibility: <SportsMartialArts />,
+      sports: <SportsMartialArts />,
+      rehabilitation: <FitnessCenter />,
+      weight_loss: <TrendingUp />,
+      muscle_gain: <FitnessCenter />,
+    };
+    return icons[category] || <FitnessCenter />;
+  };
+
+  const RoutineCard = ({ routine, index }) => (
+  <Fade in timeout={300 + index * 100}>
     <Card
-      elevation={2}
-      sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+      elevation={0}
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        backdropFilter: 'blur(20px)',
+        backgroundColor: 'rgba(255,255,255,0.9)',
+        border: '1px solid rgba(255,255,255,0.2)',
+        borderRadius: 4,
+        overflow: 'hidden',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        position: 'relative',
+        '&:hover': {
+          transform: 'translateY(-8px) scale(1.02)',
+          boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
+          backgroundColor: 'rgba(255,255,255,0.95)',
+        },
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 6,
+          background: getCategoryGradient(routine.category),
+        }
+      }}
     >
-      <CardContent sx={{ flexGrow: 1 }}>
-        <Box
+      {/* Encabezado de la tarjeta */}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          p: 3,
+          pb: 0,
+          gap: 2
+        }}
+      >
+        <Avatar
           sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-            mb: 2,
+            width: 50,
+            height: 50,
+            background: getCategoryGradient(routine.category),
+            color: 'white',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
           }}
         >
+          {getCategoryIcon(routine.category)}
+        </Avatar>
+        <Box sx={{ flexGrow: 1 }}>
           <Typography
-            variant='h6'
-            component='div'
+            variant="h6"
+            component="div"
+            sx={{
+              fontWeight: 700,
+              mb: 0.5,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}
           >
             {routine.name}
           </Typography>
-          <Box>
+          <Box sx={{ display: 'flex', gap: 1 }}>
             <Chip
               label={routine.category}
-              color={getCategoryColor(routine.category)}
-              size='small'
-              sx={{ mr: 1 }}
+              size="small"
+              sx={{
+                textTransform: 'capitalize',
+                background: getCategoryGradient(routine.category),
+                color: 'white',
+                fontWeight: 600,
+                height: 24,
+              }}
             />
             <Chip
               label={routine.difficulty}
-              color={getDifficultyColor(routine.difficulty)}
-              size='small'
+              size="small"
+              sx={{
+                textTransform: 'capitalize',
+                fontWeight: 600,
+                height: 24,
+                backgroundColor: `${getDifficultyColor(routine.difficulty)}.light`,
+                color: `${getDifficultyColor(routine.difficulty)}.dark`,
+              }}
             />
           </Box>
         </Box>
+      </Box>
+
+      {/* Contenido principal */}
+      <CardContent sx={{ flexGrow: 1, p: 3, pt: 2 }}>
         <Typography
-          variant='body2'
-          color='text.secondary'
-          sx={{ mb: 2 }}
+          variant="body2"
+          color="text.secondary"
+          sx={{
+            mb: 3,
+            lineHeight: 1.6,
+            fontStyle: routine.description ? 'normal' : 'italic',
+            minHeight: '3.6em',
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden'
+          }}
         >
-          {routine.description || 'Sin descripción'}
+          {routine.description || 'No hay descripción'}
         </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-          <AccessTime sx={{ mr: 1, fontSize: 16 }} />
-          <Typography
-            variant='body2'
-            color='text.secondary'
-          >
-            {routine.estimatedDuration} min
-          </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-          <FitnessCenter sx={{ mr: 1, fontSize: 16 }} />
-          <Typography
-            variant='body2'
-            color='text.secondary'
-          >
-            {routine.exercises?.length || 0} ejercicios
-          </Typography>
-        </Box>
+
+        {/* Estadísticas */}
+        <Grid container spacing={2}>
+          <Grid item xs={6}>
+            <StatBox
+              icon={<AccessTime />}
+              label="Duración"
+              value={`${routine.estimatedDuration} min`}
+              color="primary"
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <StatBox
+              icon={<FitnessCenter />}
+              label="Ejercicios"
+              value={routine.exercises?.length || 0}
+              color="success"
+            />
+          </Grid>
+        </Grid>
+
         {routine.isPublic && (
-          <Chip
-            label='Público'
-            color='info'
-            size='small'
-            sx={{ mt: 1 }}
-          />
+          <Box sx={{ mt: 2 }}>
+            <Chip
+              icon={<Group />}
+              label="Pública"
+              size="small"
+              sx={{
+                backgroundColor: 'rgba(2, 136, 209, 0.1)',
+                color: '#0288d1',
+                fontWeight: 600,
+              }}
+            />
+          </Box>
         )}
       </CardContent>
-      <CardActions>
-        {/* <Button
-          size='small'
-          startIcon={<PlayArrow />}
-          color='primary'
-          variant='contained'
-        >
-          Iniciar
-        </Button> */}
+
+      {/* Acciones */}
+      <CardActions sx={{ p: 2, gap: 1 }}>
         <Button
-          size='small'
-          color='secondary'
+          size="small"
+          variant="outlined"
+          startIcon={<Visibility />}
           onClick={() => {
             setExercisesToShow(routine.exercises || []);
             setOpenExercisesDialog(true);
+          }}
+          sx={{
+            borderRadius: 3,
+            textTransform: 'none',
+            fontWeight: 600,
+            flexGrow: 1
           }}
         >
           Ver ejercicios
         </Button>
         <IconButton
-          size='small'
+          size="small"
           onClick={() => handleOpenDialog(routine)}
-          color='primary'
+          sx={{
+            backgroundColor: 'rgba(25, 118, 210, 0.1)',
+            color: '#1976d2',
+          }}
         >
           <Edit />
         </IconButton>
         <IconButton
-          size='small'
+          size="small"
           onClick={() => handleDelete(routine._id)}
-          color='error'
+          sx={{
+            backgroundColor: 'rgba(211, 47, 47, 0.1)',
+            color: '#d32f2f',
+          }}
         >
           <Delete />
         </IconButton>
       </CardActions>
     </Card>
-  );
+  </Fade>
+);
+
+// Componente auxiliar para las estadísticas
+const StatBox = ({ icon, label, value, color }) => (
+  <Box sx={{
+    display: 'flex',
+    alignItems: 'center',
+    p: 1.5,
+    backgroundColor: `${color}.lightest`,
+    borderRadius: 2,
+    border: `1px solid ${color}.border`,
+    height: '100%'
+  }}>
+    <Avatar sx={{
+      width: 32,
+      height: 32,
+      mr: 1.5,
+      backgroundColor: `${color}.light`,
+      color: `${color}.main`
+    }}>
+      {icon}
+    </Avatar>
+    <Box>
+      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+        {label}
+      </Typography>
+      <Typography variant="body2" color={`${color}.dark`} sx={{ fontWeight: 700 }}>
+        {value}
+      </Typography>
+    </Box>
+  </Box>
+);
+
   // Modal para ver ejercicios de la rutina
   const ExercisesDialog = () => (
     <Dialog
       open={openExercisesDialog}
       onClose={() => setOpenExercisesDialog(false)}
-      maxWidth='sm'
+      maxWidth="md"
       fullWidth
+      PaperProps={{
+        sx: {
+          backdropFilter: 'blur(20px)',
+          backgroundColor: 'rgba(255,255,255,0.95)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: 4,
+        }
+      }}
     >
-      <DialogTitle>Ejercicios de la rutina</DialogTitle>
-      <DialogContent>
+      <DialogTitle sx={{
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: 'white',
+        fontWeight: 700,
+        fontSize: '1.3rem'
+      }}>
+        💪 Ejercicios de la rutina
+      </DialogTitle>
+      <DialogContent sx={{ p: 3 }}>
         {exercisesToShow && exercisesToShow.length > 0 ? (
           <Box>
             {exercisesToShow.map((ex, idx) => {
@@ -357,59 +525,119 @@ const Routines = () => {
                 ex.exercise && typeof ex.exercise === 'object'
                   ? ex.exercise
                   : availableExercises.find(
-                      (e) => e._id === (ex.exercise?._id || ex.exercise)
-                    );
+                    (e) => e._id === (ex.exercise?._id || ex.exercise)
+                  );
               return (
-                <Box
-                  key={idx}
-                  sx={{
-                    mb: 2,
-                    p: 1,
-                    border: '1px solid #eee',
-                    borderRadius: 1,
-                  }}
-                >
-                  <Typography variant='subtitle1'>
-                    <b>{exObj ? exObj.name : `Ejercicio ${idx + 1}`}</b>
-                  </Typography>
-                  {exObj && exObj.description && (
-                    <Typography
-                      variant='body2'
-                      color='text.secondary'
-                    >
-                      {exObj.description}
-                    </Typography>
-                  )}
-                  {ex.sets && ex.sets.length > 0 && (
-                    <Box sx={{ mt: 1 }}>
-                      <Typography variant='body2'>
-                        <b>Sets:</b>
+                <Fade in key={idx} timeout={300 + idx * 100}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      mb: 3,
+                      p: 3,
+                      backgroundColor: 'rgba(255,255,255,0.7)',
+                      backdropFilter: 'blur(10px)',
+                      border: '1px solid rgba(0,0,0,0.1)',
+                      borderRadius: 3,
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
+                        backgroundColor: 'rgba(255,255,255,0.9)',
+                      }
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                      <Avatar sx={{
+                        width: 40,
+                        height: 40,
+                        mr: 2,
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        color: 'white',
+                        fontWeight: 700
+                      }}>
+                        {idx + 1}
+                      </Avatar>
+                      <Typography variant="h6" sx={{ fontWeight: 700, color: '#1976d2' }}>
+                        {exObj ? exObj.name : `Ejercicio ${idx + 1}`}
                       </Typography>
-                      {ex.sets.map((set, sidx) => (
-                        <Typography
-                          key={sidx}
-                          variant='body2'
-                          sx={{ ml: 2 }}
-                        >
-                          {`Set ${sidx + 1}: ${set.reps || 0} reps, ${
-                            set.weight || 0
-                          } kg, ${set.duration || 0} seg, descanso ${
-                            set.rest || 0
-                          } seg`}
-                        </Typography>
-                      ))}
                     </Box>
-                  )}
-                </Box>
+                    {exObj && exObj.description && (
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ mb: 2, fontStyle: 'italic', lineHeight: 1.6 }}
+                      >
+                        {exObj.description}
+                      </Typography>
+                    )}
+                    {ex.sets && ex.sets.length > 0 && (
+                      <Box>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, color: '#2e7d32' }}>
+                          📊 Sets programados:
+                        </Typography>
+                        <Grid container spacing={1}>
+                          {ex.sets.map((set, sidx) => (
+                            <Grid item xs={12} sm={6} md={4} key={sidx}>
+                              <Paper
+                                elevation={0}
+                                sx={{
+                                  p: 2,
+                                  backgroundColor: 'rgba(46, 125, 50, 0.05)',
+                                  border: '1px solid rgba(46, 125, 50, 0.2)',
+                                  borderRadius: 2,
+                                  textAlign: 'center'
+                                }}
+                              >
+                                <Typography variant="caption" color="success.main" sx={{ fontWeight: 700, display: 'block', mb: 1 }}>
+                                  Set {sidx + 1}
+                                </Typography>
+                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                  {set.reps || 0} reps • {set.weight || 0} kg
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  {set.duration || 0}s • descanso {set.rest || 0}s
+                                </Typography>
+                              </Paper>
+                            </Grid>
+                          ))}
+                        </Grid>
+                      </Box>
+                    )}
+                  </Paper>
+                </Fade>
               );
             })}
           </Box>
         ) : (
-          <Typography>No hay ejercicios en esta rutina.</Typography>
+          <Box sx={{ textAlign: 'center', py: 4 }}>
+            <Avatar sx={{
+              width: 80,
+              height: 80,
+              mx: 'auto',
+              mb: 2,
+              backgroundColor: 'rgba(0,0,0,0.05)'
+            }}>
+              <FitnessCenter sx={{ fontSize: 40, color: 'text.secondary' }} />
+            </Avatar>
+            <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 600 }}>
+              No hay ejercicios en esta rutina
+            </Typography>
+          </Box>
         )}
       </DialogContent>
-      <DialogActions>
-        <Button onClick={() => setOpenExercisesDialog(false)}>Cerrar</Button>
+      <DialogActions sx={{ p: 3 }}>
+        <Button
+          onClick={() => setOpenExercisesDialog(false)}
+          variant="contained"
+          sx={{
+            borderRadius: 3,
+            textTransform: 'none',
+            fontWeight: 600,
+            px: 3
+          }}
+        >
+          Cerrar
+        </Button>
       </DialogActions>
     </Dialog>
   );
@@ -454,259 +682,435 @@ const Routines = () => {
 
   if (loading) {
     return (
-      <Container
-        maxWidth='lg'
-        sx={{ mt: 4, mb: 4 }}
-      >
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            minHeight: '50vh',
-          }}
-        >
-          <Typography>Cargando rutinas...</Typography>
-        </Box>
-      </Container>
+      <Box sx={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3), transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3), transparent 50%), radial-gradient(circle at 40% 80%, rgba(120, 119, 255, 0.3), transparent 50%)',
+          pointerEvents: 'none'
+        }
+      }}>
+        <Container maxWidth="lg" sx={{ pt: 8, pb: 4, position: 'relative', zIndex: 1 }}>
+          <Typography variant="h3" sx={{
+            color: 'white',
+            textAlign: 'center',
+            mb: 6,
+            fontWeight: 800,
+            textShadow: '0 4px 20px rgba(0,0,0,0.3)'
+          }}>
+            🏋️‍♂️ Cargando rutinas...
+          </Typography>
+          <Grid container spacing={3}>
+            {[1, 2, 3, 4, 5, 6].map((item) => (
+              <Grid item xs={12} sm={6} md={4} key={item}>
+                <Skeleton
+                  variant="rectangular"
+                  height={300}
+                  sx={{
+                    borderRadius: 4,
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    animation: 'pulse 1.5s ease-in-out 0.5s infinite alternate'
+                  }}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </Box>
     );
   }
 
   return (
-    <Container
-      maxWidth='lg'
-      sx={{ mt: 4, mb: 4 }}
-    >
-      <Grid
-        container
-        spacing={3}
-      >
-        {/* Header */}
-        <Grid
-          item
-          xs={12}
-        >
-          <Box
-            sx={{
+    <Box sx={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      position: 'relative',
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3), transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3), transparent 50%), radial-gradient(circle at 40% 80%, rgba(120, 119, 255, 0.3), transparent 50%)',
+        pointerEvents: 'none'
+      }
+    }}>
+      <Container maxWidth="lg" sx={{ pt: 6, pb: 4, position: 'relative', zIndex: 1 }}>
+        <Grid container spacing={4}>
+          {/* Header */}
+          <Grid item xs={12}>
+            <Box sx={{
               display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
               justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
-            <Typography
-              variant='h4'
-              gutterBottom
-            >
-              Mis Rutinas
-            </Typography>
-            <Button
-              variant='contained'
-              startIcon={<Add />}
-              onClick={() => handleOpenDialog()}
-            >
-              Nueva Rutina
-            </Button>
-          </Box>
-        </Grid>
-
-        {/* Routines Grid */}
-        {routines.length > 0 ? (
-          routines.map((routine) => (
-            <Grid
-              item
-              xs={12}
-              sm={6}
-              md={4}
-              key={routine._id}
-            >
-              <RoutineCard routine={routine} />
-            </Grid>
-          ))
-        ) : (
-          <Grid
-            item
-            xs={12}
-          >
-            <Paper sx={{ p: 4, textAlign: 'center' }}>
-              <FitnessCenter
-                sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }}
-              />
-              <Typography
-                variant='h6'
-                gutterBottom
-              >
-                No tienes rutinas creadas
-              </Typography>
-              <Typography
-                variant='body2'
-                color='text.secondary'
-                sx={{ mb: 3 }}
-              >
-                Crea tu primera rutina para empezar a entrenar
-              </Typography>
+              alignItems: { xs: 'flex-start', sm: 'center' },
+              gap: 3,
+              mb: 4,
+              backgroundColor: 'rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(10px)',
+              p: 3,
+              borderRadius: 4,
+              border: '1px solid rgba(255,255,255,0.2)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+            }}>
+              <Box>
+                <Typography
+                  variant="h3"
+                  sx={{
+                    fontWeight: 800,
+                    color: 'white',
+                    textShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                    fontSize: { xs: '2rem', md: '2.5rem' },
+                    mb: { xs: 1, sm: 0 }
+                  }}
+                >
+                  🏋️‍♂️ Mis Rutinas
+                </Typography>
+                <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                  Administra tus rutinas de entrenamiento personalizadas
+                </Typography>
+              </Box>
               <Button
-                variant='contained'
+                variant="contained"
+                size="large"
                 startIcon={<Add />}
                 onClick={() => handleOpenDialog()}
+                sx={{
+                  borderRadius: 4,
+                  px: 4,
+                  py: 1.5,
+                  textTransform: 'none',
+                  fontWeight: 700,
+                  fontSize: '1rem',
+                  background: 'rgba(255,255,255,0.9)',
+                  color: '#1976d2',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+                  '&:hover': {
+                    transform: 'translateY(-2px) scale(1.05)',
+                    boxShadow: '0 12px 40px rgba(0,0,0,0.3)',
+                    backgroundColor: 'white',
+                  },
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  alignSelf: { xs: 'stretch', sm: 'center' }
+                }}
               >
-                Crear Primera Rutina
+                Nueva Rutina
               </Button>
-            </Paper>
+            </Box>
           </Grid>
-        )}
-      </Grid>
 
-      {/* Floating Action Button */}
-      <Fab
-        color='primary'
-        aria-label='add'
-        sx={{ position: 'fixed', bottom: 16, right: 16 }}
-        onClick={() => handleOpenDialog()}
-      >
-        <Add />
-      </Fab>
+          {/* Routines Grid */}
+          {routines.length > 0 ? (
+            routines.map((routine, index) => (
+              <Grid item xs={12} sm={6} md={4} key={routine._id}>
+                <RoutineCard routine={routine} index={index} />
+              </Grid>
+            ))
+          ) : (
+            <Grid item xs={12}>
+              <Fade in timeout={600}>
+                <Paper sx={{
+                  p: 6,
+                  textAlign: 'center',
+                  backdropFilter: 'blur(20px)',
+                  backgroundColor: 'rgba(255,255,255,0.9)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: 4,
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+                }}>
+                  <Avatar sx={{
+                    width: 120,
+                    height: 120,
+                    mx: 'auto',
+                    mb: 3,
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)',
+                  }}>
+                    <FitnessCenter sx={{ fontSize: 60 }} />
+                  </Avatar>
+                  <Typography
+                    variant="h4"
+                    gutterBottom
+                    sx={{
+                      fontWeight: 800,
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      backgroundClip: 'text',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      mb: 2
+                    }}
+                  >
+                    🎯 ¡Comienza tu viaje fitness!
+                  </Typography>
+                  <Typography
+                    variant="h6"
+                    color="text.secondary"
+                    sx={{ mb: 1, fontWeight: 600 }}
+                  >
+                    No tienes rutinas creadas
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    color="text.secondary"
+                    sx={{ mb: 4, lineHeight: 1.6, maxWidth: 500, mx: 'auto' }}
+                  >
+                    Crea tu primera rutina personalizada y comienza a entrenar de manera estructurada y efectiva
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    size="large"
+                    startIcon={<Add />}
+                    onClick={() => handleOpenDialog()}
+                    sx={{
+                      borderRadius: 4,
+                      px: 4,
+                      py: 1.5,
+                      textTransform: 'none',
+                      fontWeight: 700,
+                      fontSize: '1.1rem',
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      boxShadow: '0 8px 25px rgba(102, 126, 234, 0.4)',
+                      '&:hover': {
+                        transform: 'translateY(-3px) scale(1.05)',
+                        boxShadow: '0 15px 35px rgba(102, 126, 234, 0.5)',
+                      },
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                    }}
+                  >
+                    Crear Primera Rutina
+                  </Button>
+                </Paper>
+              </Fade>
+            </Grid>
+          )}
+        </Grid>
 
-      {/* Create/Edit Dialog */}
-      <Dialog
-        open={openDialog}
-        onClose={handleCloseDialog}
-        maxWidth='md'
-        fullWidth
-      >
-        <DialogTitle>
-          {selectedRoutine ? 'Editar Rutina' : 'Nueva Rutina'}
-        </DialogTitle>
-        <DialogContent>
-          <Grid
-            container
-            spacing={2}
-            sx={{ mt: 1 }}
-          >
-            <Grid
-              item
-              xs={12}
-            >
-              <TextField
-                fullWidth
-                label='Nombre de la rutina'
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                required
-              />
-            </Grid>
-            <Grid
-              item
-              xs={12}
-            >
-              <TextField
-                fullWidth
-                label='Descripción'
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-                multiline
-                rows={3}
-              />
-            </Grid>
-            <Grid
-              item
-              xs={12}
-              sm={6}
-            >
-              <FormControl fullWidth>
-                <InputLabel>Categoría</InputLabel>
-                <Select
-                  value={formData.category}
+        {/* Floating Action Button */}
+        <Fab
+          color="primary"
+          aria-label="add"
+          sx={{
+            position: 'fixed',
+            bottom: 24,
+            right: 24,
+            width: 64,
+            height: 64,
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            boxShadow: '0 8px 25px rgba(102, 126, 234, 0.4)',
+            '&:hover': {
+              transform: 'scale(1.1) rotate(90deg)',
+              boxShadow: '0 12px 35px rgba(102, 126, 234, 0.6)',
+            },
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+          }}
+          onClick={() => handleOpenDialog()}
+        >
+          <Add sx={{ fontSize: 32 }} />
+        </Fab>
+
+        {/* Create/Edit Dialog */}
+        <Dialog
+          open={openDialog}
+          onClose={handleCloseDialog}
+          maxWidth="lg"
+          fullWidth
+          PaperProps={{
+            sx: {
+              backdropFilter: 'blur(20px)',
+              backgroundColor: 'rgba(255,255,255,0.95)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: 4,
+              maxHeight: '90vh'
+            }
+          }}
+        >
+          <DialogTitle sx={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+            fontWeight: 700,
+            fontSize: '1.3rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1
+          }}>
+            {selectedRoutine ? '✏️ Editar Rutina' : '➕ Nueva Rutina'}
+          </DialogTitle>
+          <DialogContent sx={{ p: 4 }}>
+            <Grid container spacing={3} sx={{ mt: 1 }}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="🏷️ Nombre de la rutina"
+                  value={formData.name}
                   onChange={(e) =>
-                    setFormData({ ...formData, category: e.target.value })
+                    setFormData({ ...formData, name: e.target.value })
                   }
-                >
-                  <MenuItem value='strength'>Fuerza</MenuItem>
-                  <MenuItem value='cardio'>Cardio</MenuItem>
-                  <MenuItem value='flexibility'>Flexibilidad</MenuItem>
-                  <MenuItem value='sports'>Deportes</MenuItem>
-                  <MenuItem value='rehabilitation'>Rehabilitación</MenuItem>
-                  <MenuItem value='weight_loss'>Pérdida de peso</MenuItem>
-                  <MenuItem value='muscle_gain'>Ganancia muscular</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid
-              item
-              xs={12}
-              sm={6}
-            >
-              <FormControl fullWidth>
-                <InputLabel>Dificultad</InputLabel>
-                <Select
-                  value={formData.difficulty}
+                  required
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 3,
+                      backgroundColor: 'rgba(102, 126, 234, 0.05)',
+                      '&:hover fieldset': {
+                        borderColor: '#667eea',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#667eea',
+                        borderWidth: 2,
+                      }
+                    }
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="📝 Descripción"
+                  value={formData.description}
                   onChange={(e) =>
-                    setFormData({ ...formData, difficulty: e.target.value })
+                    setFormData({ ...formData, description: e.target.value })
                   }
-                >
-                  <MenuItem value='beginner'>Principiante</MenuItem>
-                  <MenuItem value='intermediate'>Intermedio</MenuItem>
-                  <MenuItem value='advanced'>Avanzado</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid
-              item
-              xs={12}
-              sm={6}
-            >
-              <TextField
-                fullWidth
-                label='Duración estimada (min)'
-                type='number'
-                value={formData.estimatedDuration}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    estimatedDuration: parseInt(e.target.value),
-                  })
-                }
-              />
-            </Grid>
-            <Grid
-              item
-              xs={12}
-            >
-              <FormControl fullWidth>
-                <InputLabel id='exercises-label'>Ejercicios</InputLabel>
-                <Select
-                  labelId='exercises-label'
-                  multiple
-                  value={formData.exercises.map((ex) =>
-                    typeof ex === 'string' ? ex : ex.exercise
-                  )}
-                  onChange={async (e) => {
-                    const selected = e.target.value;
-                    if (selected.includes('nuevo')) {
-                      setOpenNewExerciseDialog(true);
-                      // Eliminar 'nuevo' de la selección para evitar que quede en la rutina
+                  multiline
+                  rows={3}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 3,
+                      backgroundColor: 'rgba(102, 126, 234, 0.05)',
+                      '&:hover fieldset': {
+                        borderColor: '#667eea',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#667eea',
+                        borderWidth: 2,
+                      }
+                    }
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel>🎯 Categoría</InputLabel>
+                  <Select
+                    value={formData.category}
+                    onChange={(e) =>
+                      setFormData({ ...formData, category: e.target.value })
+                    }
+                    sx={{
+                      borderRadius: 3,
+                      backgroundColor: 'rgba(102, 126, 234, 0.05)',
+                      '&:hover .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#667eea',
+                      },
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#667eea',
+                        borderWidth: 2,
+                      }
+                    }}
+                  >
+                    <MenuItem value="strength">💪 Fuerza</MenuItem>
+                    <MenuItem value="cardio">❤️ Cardio</MenuItem>
+                    <MenuItem value="flexibility">🤸 Flexibilidad</MenuItem>
+                    <MenuItem value="sports">⚽ Deportes</MenuItem>
+                    <MenuItem value="rehabilitation">🏥 Rehabilitación</MenuItem>
+                    <MenuItem value="weight_loss">📉 Pérdida de peso</MenuItem>
+                    <MenuItem value="muscle_gain">📈 Ganancia muscular</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel>📊 Dificultad</InputLabel>
+                  <Select
+                    value={formData.difficulty}
+                    onChange={(e) =>
+                      setFormData({ ...formData, difficulty: e.target.value })
+                    }
+                    sx={{
+                      borderRadius: 3,
+                      backgroundColor: 'rgba(102, 126, 234, 0.05)',
+                      '&:hover .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#667eea',
+                      },
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#667eea',
+                        borderWidth: 2,
+                      }
+                    }}
+                  >
+                    <MenuItem value="beginner">🟢 Principiante</MenuItem>
+                    <MenuItem value="intermediate">🟡 Intermedio</MenuItem>
+                    <MenuItem value="advanced">🔴 Avanzado</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="⏱️ Duración estimada (min)"
+                  type="number"
+                  value={formData.estimatedDuration}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      estimatedDuration: parseInt(e.target.value),
+                    })
+                  }
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 3,
+                      backgroundColor: 'rgba(102, 126, 234, 0.05)',
+                      '&:hover fieldset': {
+                        borderColor: '#667eea',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#667eea',
+                        borderWidth: 2,
+                      }
+                    }
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel id="exercises-label">🏋️ Ejercicios</InputLabel>
+                  <Select
+                    labelId="exercises-label"
+                    multiple
+                    value={formData.exercises.map((ex) =>
+                      typeof ex === 'string' ? ex : ex.exercise
+                    )}
+                    onChange={async (e) => {
+                      const selected = e.target.value;
+                      if (selected.includes('nuevo')) {
+                        setOpenNewExerciseDialog(true);
+                        setFormData((prev) => ({
+                          ...prev,
+                          exercises: prev.exercises.filter(
+                            (ex) => ex !== 'nuevo'
+                          ),
+                        }));
+                        return;
+                      }
                       setFormData((prev) => ({
                         ...prev,
-                        exercises: prev.exercises.filter(
-                          (ex) => ex !== 'nuevo'
-                        ),
-                      }));
-                      return;
-                    }
-                    setFormData((prev) => ({
-                      ...prev,
-                      exercises: selected.map((exId, idx) => {
-                        const found = prev.exercises.find((ex) =>
-                          typeof ex === 'string'
-                            ? ex === exId
-                            : ex.exercise === exId
-                        );
-                        return found
-                          ? found
-                          : {
+                        exercises: selected.map((exId, idx) => {
+                          const found = prev.exercises.find((ex) =>
+                            typeof ex === 'string'
+                              ? ex === exId
+                              : ex.exercise === exId
+                          );
+                          return found
+                            ? found
+                            : {
                               exercise: exId,
                               sets: [
                                 {
@@ -717,481 +1121,701 @@ const Routines = () => {
                                 },
                               ],
                             };
-                      }),
-                    }));
-                  }}
-                  renderValue={(selected) =>
-                    availableExercises
-                      .filter((ex) => selected.includes(ex._id))
-                      .map((ex) => ex.name)
-                      .concat(
-                        selected.includes('nuevo') ? ['(Nuevo ejercicio)'] : []
-                      )
-                      .join(', ')
-                  }
-                  disabled={loadingExercises}
-                >
-                  {loadingExercises ? (
-                    <MenuItem disabled>Cargando ejercicios...</MenuItem>
-                  ) : (
-                    [
-                      ...availableExercises.map((ex) => (
-                        <MenuItem
-                          key={ex._id}
-                          value={ex._id}
-                        >
-                          {ex.name}
-                        </MenuItem>
-                      )),
-                      <MenuItem
-                        key='nuevo'
-                        value='nuevo'
-                      >
-                        <Button
-                          variant='outlined'
-                          color='primary'
-                          fullWidth
-                        >
-                          + Crear nuevo ejercicio
-                        </Button>
-                      </MenuItem>,
-                    ]
-                  )}
-                </Select>
-              </FormControl>
-            </Grid>
-            {/* Sets y notas por ejercicio */}
-            {formData.exercises.length > 0 && (
-              <Grid
-                item
-                xs={12}
-              >
-                <Typography
-                  variant='subtitle1'
-                  sx={{ mt: 2, mb: 1 }}
-                >
-                  Sets por ejercicio
-                </Typography>
-                {formData.exercises.map((ex, idx) => {
-                  const exId = typeof ex === 'string' ? ex : ex.exercise;
-                  const exObj = availableExercises.find((e) => e._id === exId);
-                  const sets =
-                    (typeof ex === 'string'
-                      ? [{ reps: '', weight: '', duration: '', rest: '' }]
-                      : ex.sets) || [];
-                  return (
-                    <Box
-                      key={exId}
-                      sx={{
-                        mb: 2,
-                        p: 2,
-                        border: '1px solid #eee',
-                        borderRadius: 1,
-                        position: 'relative',
-                      }}
-                    >
-                      <Box
-                        sx={{ display: 'flex', alignItems: 'center', mb: 1 }}
-                      >
-                        <Typography
-                          variant='subtitle2'
-                          sx={{ flexGrow: 1 }}
-                        >
-                          <b>{exObj ? exObj.name : 'Ejercicio'}</b>
-                        </Typography>
-                        <Button
-                          size='small'
-                          color='error'
-                          variant='outlined'
-                          onClick={() => {
-                            setFormData((prev) => ({
-                              ...prev,
-                              exercises: prev.exercises.filter(
-                                (_, i) => i !== idx
-                              ),
-                            }));
-                          }}
-                          sx={{ ml: 2 }}
-                        >
-                          Eliminar ejercicio
-                        </Button>
-                      </Box>
-                      {sets.map((set, sidx) => (
-                        <Box
-                          key={sidx}
-                          sx={{
-                            display: 'flex',
-                            gap: 1,
-                            alignItems: 'center',
-                            mb: 1,
-                          }}
-                        >
-                          <TextField
-                            label='Reps'
-                            type='number'
-                            size='small'
-                            value={set.reps}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setFormData((prev) => {
-                                const newExercises = [...prev.exercises];
-                                if (typeof newExercises[idx] === 'string')
-                                  newExercises[idx] = {
-                                    exercise: exId,
-                                    sets: [
-                                      {
-                                        reps: '',
-                                        weight: '',
-                                        duration: '',
-                                        rest: '',
-                                      },
-                                    ],
-                                  };
-                                newExercises[idx].sets[sidx].reps = val;
-                                return { ...prev, exercises: newExercises };
-                              });
-                            }}
-                            sx={{ width: 80 }}
-                          />
-                          <TextField
-                            label='Peso (kg)'
-                            type='number'
-                            size='small'
-                            value={set.weight}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setFormData((prev) => {
-                                const newExercises = [...prev.exercises];
-                                if (typeof newExercises[idx] === 'string')
-                                  newExercises[idx] = {
-                                    exercise: exId,
-                                    sets: [
-                                      {
-                                        reps: '',
-                                        weight: '',
-                                        duration: '',
-                                        rest: '',
-                                      },
-                                    ],
-                                  };
-                                newExercises[idx].sets[sidx].weight = val;
-                                return { ...prev, exercises: newExercises };
-                              });
-                            }}
-                            sx={{ width: 100 }}
-                          />
-                          <TextField
-                            label='Duración (seg)'
-                            type='number'
-                            size='small'
-                            value={set.duration}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setFormData((prev) => {
-                                const newExercises = [...prev.exercises];
-                                if (typeof newExercises[idx] === 'string')
-                                  newExercises[idx] = {
-                                    exercise: exId,
-                                    sets: [
-                                      {
-                                        reps: '',
-                                        weight: '',
-                                        duration: '',
-                                        rest: '',
-                                      },
-                                    ],
-                                  };
-                                newExercises[idx].sets[sidx].duration = val;
-                                return { ...prev, exercises: newExercises };
-                              });
-                            }}
-                            sx={{ width: 120 }}
-                          />
-                          <TextField
-                            label='Descanso (seg)'
-                            type='number'
-                            size='small'
-                            value={set.rest}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setFormData((prev) => {
-                                const newExercises = [...prev.exercises];
-                                if (typeof newExercises[idx] === 'string')
-                                  newExercises[idx] = {
-                                    exercise: exId,
-                                    sets: [
-                                      {
-                                        reps: '',
-                                        weight: '',
-                                        duration: '',
-                                        rest: '',
-                                      },
-                                    ],
-                                  };
-                                newExercises[idx].sets[sidx].rest = val;
-                                return { ...prev, exercises: newExercises };
-                              });
-                            }}
-                            sx={{ width: 120 }}
-                          />
+                        }),
+                      }));
+                    }}
+                    renderValue={(selected) =>
+                      availableExercises
+                        .filter((ex) => selected.includes(ex._id))
+                        .map((ex) => ex.name)
+                        .concat(
+                          selected.includes('nuevo') ? ['(Nuevo ejercicio)'] : []
+                        )
+                        .join(', ')
+                    }
+                    disabled={loadingExercises}
+                    sx={{
+                      borderRadius: 3,
+                      backgroundColor: 'rgba(102, 126, 234, 0.05)',
+                      '&:hover .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#667eea',
+                      },
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#667eea',
+                        borderWidth: 2,
+                      }
+                    }}
+                  >
+                    {loadingExercises ? (
+                      <MenuItem disabled>Cargando ejercicios...</MenuItem>
+                    ) : (
+                      [
+                        ...availableExercises.map((ex) => (
+                          <MenuItem key={ex._id} value={ex._id}>
+                            {ex.name}
+                          </MenuItem>
+                        )),
+                        <MenuItem key="nuevo" value="nuevo">
                           <Button
-                            size='small'
-                            color='error'
-                            onClick={() => {
-                              setFormData((prev) => {
-                                const newExercises = [...prev.exercises];
-                                if (typeof newExercises[idx] === 'string')
-                                  newExercises[idx] = {
-                                    exercise: exId,
-                                    sets: [
-                                      {
-                                        reps: '',
-                                        weight: '',
-                                        duration: '',
-                                        rest: '',
-                                      },
-                                    ],
-                                  };
-                                newExercises[idx].sets.splice(sidx, 1);
-                                if (newExercises[idx].sets.length === 0)
-                                  newExercises[idx].sets.push({
-                                    reps: '',
-                                    weight: '',
-                                    duration: '',
-                                    rest: '',
-                                  });
-                                return { ...prev, exercises: newExercises };
-                              });
+                            variant="outlined"
+                            color="primary"
+                            fullWidth
+                            sx={{
+                              borderRadius: 2,
+                              textTransform: 'none',
+                              fontWeight: 600
                             }}
                           >
-                            Eliminar
+                            ➕ Crear nuevo ejercicio
                           </Button>
-                          <Button
-                            size='small'
-                            color='info'
-                            onClick={() => {
-                              setFormData((prev) => {
-                                const newExercises = [...prev.exercises];
-                                if (typeof newExercises[idx] === 'string')
-                                  newExercises[idx] = {
-                                    exercise: exId,
-                                    sets: [
-                                      {
-                                        reps: '',
-                                        weight: '',
-                                        duration: '',
-                                        rest: '',
-                                      },
-                                    ],
-                                  };
-                                // Duplicar el set
-                                const setToCopy = {
-                                  ...newExercises[idx].sets[sidx],
-                                };
-                                newExercises[idx].sets.splice(
-                                  sidx + 1,
-                                  0,
-                                  setToCopy
-                                );
-                                return { ...prev, exercises: newExercises };
-                              });
-                            }}
-                            sx={{ ml: 1 }}
-                          >
-                            Duplicar
-                          </Button>
-                        </Box>
-                      ))}
-                      <Button
-                        size='small'
-                        variant='outlined'
-                        onClick={() => {
-                          setFormData((prev) => {
-                            const newExercises = [...prev.exercises];
-                            if (typeof newExercises[idx] === 'string')
-                              newExercises[idx] = {
-                                exercise: exId,
-                                sets: [
-                                  {
-                                    reps: '',
-                                    weight: '',
-                                    duration: '',
-                                    rest: '',
-                                  },
-                                ],
-                              };
-                            newExercises[idx].sets.push({
-                              reps: '',
-                              weight: '',
-                              duration: '',
-                              rest: '',
-                            });
-                            return { ...prev, exercises: newExercises };
-                          });
-                        }}
-                        sx={{ mt: 1 }}
-                      >
-                        Agregar set
-                      </Button>
-                    </Box>
-                  );
-                })}
+                        </MenuItem>,
+                      ]
+                    )}
+                  </Select>
+                </FormControl>
               </Grid>
-            )}
-          </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancelar</Button>
-          <Button
-            onClick={handleSubmit}
-            variant='contained'
-          >
-            {selectedRoutine ? 'Actualizar' : 'Crear'}
-          </Button>
-        </DialogActions>
-      </Dialog>
 
-      {/* Modal para ver ejercicios */}
-      <ExercisesDialog />
+              {/* Sets y notas por ejercicio */}
+              {formData.exercises.length > 0 && (
+                <Grid item xs={12}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      mt: 2,
+                      mb: 3,
+                      fontWeight: 700,
+                      color: '#1976d2',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1
+                    }}
+                  >
+                    📊 Configuración de sets por ejercicio
+                  </Typography>
+                  {formData.exercises.map((ex, idx) => {
+                    const exId = typeof ex === 'string' ? ex : ex.exercise;
+                    const exObj = availableExercises.find((e) => e._id === exId);
+                    const sets =
+                      (typeof ex === 'string'
+                        ? [{ reps: '', weight: '', duration: '', rest: '' }]
+                        : ex.sets) || [];
+                    return (
+                      <Fade in key={exId} timeout={300 + idx * 100}>
+                        <Paper
+                          elevation={0}
+                          sx={{
+                            mb: 3,
+                            p: 3,
+                            backgroundColor: 'rgba(102, 126, 234, 0.05)',
+                            border: '1px solid rgba(102, 126, 234, 0.2)',
+                            borderRadius: 3,
+                            position: 'relative',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                              backgroundColor: 'rgba(102, 126, 234, 0.08)',
+                              transform: 'translateY(-2px)',
+                              boxShadow: '0 4px 15px rgba(102, 126, 234, 0.1)'
+                            }
+                          }}
+                        >
+                          <Box sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            mb: 3
+                          }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              <Avatar sx={{
+                                width: 40,
+                                height: 40,
+                                mr: 2,
+                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                color: 'white',
+                                fontWeight: 700
+                              }}>
+                                {idx + 1}
+                              </Avatar>
+                              <Typography
+                                variant="h6"
+                                sx={{
+                                  fontWeight: 700,
+                                  color: '#1976d2'
+                                }}
+                              >
+                                {exObj ? exObj.name : 'Ejercicio'}
+                              </Typography>
+                            </Box>
+                            <Button
+                              size="small"
+                              color="error"
+                              variant="outlined"
+                              onClick={() => {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  exercises: prev.exercises.filter(
+                                    (_, i) => i !== idx
+                                  ),
+                                }));
+                              }}
+                              sx={{
+                                borderRadius: 2,
+                                textTransform: 'none',
+                                fontWeight: 600
+                              }}
+                            >
+                              🗑️ Eliminar ejercicio
+                            </Button>
+                          </Box>
 
-      {/* Modal para crear nuevo ejercicio */}
-      <Dialog
-        open={openNewExerciseDialog}
-        onClose={() => setOpenNewExerciseDialog(false)}
-        maxWidth='sm'
-        fullWidth
-      >
-        <DialogTitle>Nuevo Ejercicio</DialogTitle>
-        <DialogContent>
-          <TextField
-            label='Nombre'
-            fullWidth
-            value={newExerciseData.name}
-            onChange={(e) =>
-              setNewExerciseData({ ...newExerciseData, name: e.target.value })
-            }
-            required
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            label='Descripción'
-            fullWidth
-            value={newExerciseData.description}
-            onChange={(e) =>
-              setNewExerciseData({
-                ...newExerciseData,
-                description: e.target.value,
-              })
-            }
-            multiline
-            rows={2}
-            sx={{ mb: 2 }}
-          />
-          <FormControl
-            fullWidth
-            sx={{ mb: 2 }}
-          >
-            <InputLabel>Grupos musculares</InputLabel>
-            <Select
-              multiple
-              value={newExerciseData.muscleGroups}
-              onChange={(e) =>
-                setNewExerciseData({
-                  ...newExerciseData,
-                  muscleGroups: e.target.value,
-                })
-              }
+                          {sets.map((set, sidx) => (
+                            <Paper
+                              key={sidx}
+                              elevation={0}
+                              sx={{
+                                p: 2,
+                                mb: 2,
+                                backgroundColor: 'rgba(255,255,255,0.7)',
+                                border: '1px solid rgba(0,0,0,0.1)',
+                                borderRadius: 2,
+                              }}
+                            >
+                              <Typography variant="subtitle2" sx={{
+                                fontWeight: 700,
+                                mb: 2,
+                                color: '#2e7d32',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 1
+                              }}>
+                                🎯 Set {sidx + 1}
+                              </Typography>
+                              <Grid container spacing={2} alignItems="center">
+                                <Grid item xs={6} sm={2}>
+                                  <TextField
+                                    label="Reps"
+                                    type="number"
+                                    size="small"
+                                    fullWidth
+                                    value={set.reps}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      setFormData((prev) => {
+                                        const newExercises = [...prev.exercises];
+                                        if (typeof newExercises[idx] === 'string')
+                                          newExercises[idx] = {
+                                            exercise: exId,
+                                            sets: [{
+                                              reps: '',
+                                              weight: '',
+                                              duration: '',
+                                              rest: '',
+                                            }],
+                                          };
+                                        newExercises[idx].sets[sidx].reps = val;
+                                        return { ...prev, exercises: newExercises };
+                                      });
+                                    }}
+                                    sx={{
+                                      '& .MuiOutlinedInput-root': {
+                                        borderRadius: 2,
+                                      }
+                                    }}
+                                  />
+                                </Grid>
+                                <Grid item xs={6} sm={2}>
+                                  <TextField
+                                    label="Peso (kg)"
+                                    type="number"
+                                    size="small"
+                                    fullWidth
+                                    value={set.weight}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      setFormData((prev) => {
+                                        const newExercises = [...prev.exercises];
+                                        if (typeof newExercises[idx] === 'string')
+                                          newExercises[idx] = {
+                                            exercise: exId,
+                                            sets: [{
+                                              reps: '',
+                                              weight: '',
+                                              duration: '',
+                                              rest: '',
+                                            }],
+                                          };
+                                        newExercises[idx].sets[sidx].weight = val;
+                                        return { ...prev, exercises: newExercises };
+                                      });
+                                    }}
+                                    sx={{
+                                      '& .MuiOutlinedInput-root': {
+                                        borderRadius: 2,
+                                      }
+                                    }}
+                                  />
+                                </Grid>
+                                <Grid item xs={6} sm={2}>
+                                  <TextField
+                                    label="Duración (seg)"
+                                    type="number"
+                                    size="small"
+                                    fullWidth
+                                    value={set.duration}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      setFormData((prev) => {
+                                        const newExercises = [...prev.exercises];
+                                        if (typeof newExercises[idx] === 'string')
+                                          newExercises[idx] = {
+                                            exercise: exId,
+                                            sets: [{
+                                              reps: '',
+                                              weight: '',
+                                              duration: '',
+                                              rest: '',
+                                            }],
+                                          };
+                                        newExercises[idx].sets[sidx].duration = val;
+                                        return { ...prev, exercises: newExercises };
+                                      });
+                                    }}
+                                    sx={{
+                                      '& .MuiOutlinedInput-root': {
+                                        borderRadius: 2,
+                                      }
+                                    }}
+                                  />
+                                </Grid>
+                                <Grid item xs={6} sm={2}>
+                                  <TextField
+                                    label="Descanso (seg)"
+                                    type="number"
+                                    size="small"
+                                    fullWidth
+                                    value={set.rest}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      setFormData((prev) => {
+                                        const newExercises = [...prev.exercises];
+                                        if (typeof newExercises[idx] === 'string')
+                                          newExercises[idx] = {
+                                            exercise: exId,
+                                            sets: [{
+                                              reps: '',
+                                              weight: '',
+                                              duration: '',
+                                              rest: '',
+                                            }],
+                                          };
+                                        newExercises[idx].sets[sidx].rest = val;
+                                        return { ...prev, exercises: newExercises };
+                                      });
+                                    }}
+                                    sx={{
+                                      '& .MuiOutlinedInput-root': {
+                                        borderRadius: 2,
+                                      }
+                                    }}
+                                  />
+                                </Grid>
+                                <Grid item xs={12} sm={4}>
+                                  <Box sx={{ display: 'flex', gap: 1 }}>
+                                    <Button
+                                      size="small"
+                                      color="error"
+                                      variant="outlined"
+                                      onClick={() => {
+                                        setFormData((prev) => {
+                                          const newExercises = [...prev.exercises];
+                                          if (typeof newExercises[idx] === 'string')
+                                            newExercises[idx] = {
+                                              exercise: exId,
+                                              sets: [{
+                                                reps: '',
+                                                weight: '',
+                                                duration: '',
+                                                rest: '',
+                                              }],
+                                            };
+                                          newExercises[idx].sets.splice(sidx, 1);
+                                          if (newExercises[idx].sets.length === 0)
+                                            newExercises[idx].sets.push({
+                                              reps: '',
+                                              weight: '',
+                                              duration: '',
+                                              rest: '',
+                                            });
+                                          return { ...prev, exercises: newExercises };
+                                        });
+                                      }}
+                                      sx={{
+                                        borderRadius: 2,
+                                        textTransform: 'none',
+                                        fontWeight: 600,
+                                        minWidth: 'auto',
+                                        px: 2
+                                      }}
+                                    >
+                                      🗑️
+                                    </Button>
+                                    <Button
+                                      size="small"
+                                      color="info"
+                                      variant="outlined"
+                                      onClick={() => {
+                                        setFormData((prev) => {
+                                          const newExercises = [...prev.exercises];
+                                          if (typeof newExercises[idx] === 'string')
+                                            newExercises[idx] = {
+                                              exercise: exId,
+                                              sets: [{
+                                                reps: '',
+                                                weight: '',
+                                                duration: '',
+                                                rest: '',
+                                              }],
+                                            };
+                                          const setToCopy = {
+                                            ...newExercises[idx].sets[sidx],
+                                          };
+                                          newExercises[idx].sets.splice(
+                                            sidx + 1,
+                                            0,
+                                            setToCopy
+                                          );
+                                          return { ...prev, exercises: newExercises };
+                                        });
+                                      }}
+                                      sx={{
+                                        borderRadius: 2,
+                                        textTransform: 'none',
+                                        fontWeight: 600,
+                                        flexGrow: 1
+                                      }}
+                                    >
+                                      📋 Duplicar
+                                    </Button>
+                                  </Box>
+                                </Grid>
+                              </Grid>
+                            </Paper>
+                          ))}
+
+                          <Button
+                            size="small"
+                            variant="contained"
+                            onClick={() => {
+                              setFormData((prev) => {
+                                const newExercises = [...prev.exercises];
+                                if (typeof newExercises[idx] === 'string')
+                                  newExercises[idx] = {
+                                    exercise: exId,
+                                    sets: [{
+                                      reps: '',
+                                      weight: '',
+                                      duration: '',
+                                      rest: '',
+                                    }],
+                                  };
+                                newExercises[idx].sets.push({
+                                  reps: '',
+                                  weight: '',
+                                  duration: '',
+                                  rest: '',
+                                });
+                                return { ...prev, exercises: newExercises };
+                              });
+                            }}
+                            sx={{
+                              borderRadius: 2,
+                              textTransform: 'none',
+                              fontWeight: 600,
+                              background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+                              '&:hover': {
+                                background: 'linear-gradient(135deg, #388e3c 0%, #4caf50 100%)',
+                              }
+                            }}
+                          >
+                            ➕ Agregar set
+                          </Button>
+                        </Paper>
+                      </Fade>
+                    );
+                  })}
+                </Grid>
+              )}
+            </Grid>
+          </DialogContent>
+          <DialogActions sx={{ p: 4, gap: 2 }}>
+            <Button
+              onClick={handleCloseDialog}
+              variant="outlined"
+              sx={{
+                borderRadius: 3,
+                textTransform: 'none',
+                fontWeight: 600,
+                px: 4,
+                py: 1.5
+              }}
             >
-              <MenuItem value='chest'>Pecho</MenuItem>
-              <MenuItem value='back'>Espalda</MenuItem>
-              <MenuItem value='shoulders'>Hombros</MenuItem>
-              <MenuItem value='arms'>Brazos</MenuItem>
-              <MenuItem value='legs'>Piernas</MenuItem>
-              <MenuItem value='core'>Core</MenuItem>
-              <MenuItem value='cardio'>Cardio</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl
-            fullWidth
-            sx={{ mb: 2 }}
-          >
-            <InputLabel>Equipo</InputLabel>
-            <Select
-              multiple
-              value={newExerciseData.equipment}
-              onChange={(e) =>
-                setNewExerciseData({
-                  ...newExerciseData,
-                  equipment: e.target.value,
-                })
-              }
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              variant="contained"
+              sx={{
+                borderRadius: 3,
+                textTransform: 'none',
+                fontWeight: 700,
+                px: 4,
+                py: 1.5,
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 8px 25px rgba(102, 126, 234, 0.5)',
+                },
+                transition: 'all 0.3s ease'
+              }}
             >
-              <MenuItem value='bodyweight'>Peso corporal</MenuItem>
-              <MenuItem value='dumbbells'>Mancuernas</MenuItem>
-              <MenuItem value='barbell'>Barra</MenuItem>
-              <MenuItem value='machine'>Máquina</MenuItem>
-              <MenuItem value='cable'>Cable</MenuItem>
-              <MenuItem value='resistance_band'>Banda de resistencia</MenuItem>
-              <MenuItem value='kettlebell'>Kettlebell</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl
-            fullWidth
-            sx={{ mb: 2 }}
-          >
-            <InputLabel>Dificultad</InputLabel>
-            <Select
-              value={newExerciseData.difficulty}
-              onChange={(e) =>
-                setNewExerciseData({
-                  ...newExerciseData,
-                  difficulty: e.target.value,
-                })
-              }
+              {selectedRoutine ? '✏️ Actualizar' : '➕ Crear'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Modal para ver ejercicios */}
+        <ExercisesDialog />
+
+        {/* Modal para crear nuevo ejercicio */}
+        <Dialog
+          open={openNewExerciseDialog}
+          onClose={() => setOpenNewExerciseDialog(false)}
+          maxWidth="md"
+          fullWidth
+          PaperProps={{
+            sx: {
+              backdropFilter: 'blur(20px)',
+              backgroundColor: 'rgba(255,255,255,0.95)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: 4,
+            }
+          }}
+        >
+          <DialogTitle sx={{
+            background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+            color: 'white',
+            fontWeight: 700,
+            fontSize: '1.3rem'
+          }}>
+            ➕ Nuevo Ejercicio
+          </DialogTitle>
+          <DialogContent sx={{ p: 4 }}>
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <TextField
+                  label="🏷️ Nombre"
+                  fullWidth
+                  value={newExerciseData.name}
+                  onChange={(e) =>
+                    setNewExerciseData({ ...newExerciseData, name: e.target.value })
+                  }
+                  required
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 3,
+                      backgroundColor: 'rgba(76, 175, 80, 0.05)',
+                    }
+                  }}
+                />
+                <TextField
+                  label="📝 Descripción"
+                  fullWidth
+                  value={newExerciseData.description}
+                  onChange={(e) =>
+                    setNewExerciseData({
+                      ...newExerciseData,
+                      description: e.target.value,
+                    })
+                  }
+                  multiline
+                  rows={2}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 3,
+                      backgroundColor: 'rgba(76, 175, 80, 0.05)',
+                    }
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel>💪 Grupos musculares</InputLabel>
+                  <Select
+                    multiple
+                    value={newExerciseData.muscleGroups}
+                    onChange={(e) =>
+                      setNewExerciseData({
+                        ...newExerciseData,
+                        muscleGroups: e.target.value,
+                      })
+                    }
+                    sx={{
+                      borderRadius: 3,
+                      backgroundColor: 'rgba(76, 175, 80, 0.05)',
+                    }}
+                  >
+                    <MenuItem value="chest">🫁 Pecho</MenuItem>
+                    <MenuItem value="back">🫸 Espalda</MenuItem>
+                    <MenuItem value="shoulders">🤲 Hombros</MenuItem>
+                    <MenuItem value="arms">💪 Brazos</MenuItem>
+                    <MenuItem value="legs">🦵 Piernas</MenuItem>
+                    <MenuItem value="core">🫄 Core</MenuItem>
+                    <MenuItem value="cardio">❤️ Cardio</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel>🏋️ Equipo</InputLabel>
+                  <Select
+                    multiple
+                    value={newExerciseData.equipment}
+                    onChange={(e) =>
+                      setNewExerciseData({
+                        ...newExerciseData,
+                        equipment: e.target.value,
+                      })
+                    }
+                    sx={{
+                      borderRadius: 3,
+                      backgroundColor: 'rgba(76, 175, 80, 0.05)',
+                    }}
+                  >
+                    <MenuItem value="bodyweight">🧘 Peso corporal</MenuItem>
+                    <MenuItem value="dumbbells">🏋️ Mancuernas</MenuItem>
+                    <MenuItem value="barbell">🏋️‍♂️ Barra</MenuItem>
+                    <MenuItem value="machine">🏭 Máquina</MenuItem>
+                    <MenuItem value="cable">🔗 Cable</MenuItem>
+                    <MenuItem value="resistance_band">🎀 Banda de resistencia</MenuItem>
+                    <MenuItem value="kettlebell">⚡ Kettlebell</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel>📊 Dificultad</InputLabel>
+                  <Select
+                    value={newExerciseData.difficulty}
+                    onChange={(e) =>
+                      setNewExerciseData({
+                        ...newExerciseData,
+                        difficulty: e.target.value,
+                      })
+                    }
+                    sx={{
+                      borderRadius: 3,
+                      backgroundColor: 'rgba(76, 175, 80, 0.05)',
+                    }}
+                  >
+                    <MenuItem value="beginner">🟢 Principiante</MenuItem>
+                    <MenuItem value="intermediate">🟡 Intermedio</MenuItem>
+                    <MenuItem value="advanced">🔴 Avanzado</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="📋 Instrucciones (separadas por coma)"
+                  fullWidth
+                  value={newExerciseData.instructions.join(', ')}
+                  onChange={(e) =>
+                    setNewExerciseData({
+                      ...newExerciseData,
+                      instructions: e.target.value.split(',').map((i) => i.trim()),
+                    })
+                  }
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 3,
+                      backgroundColor: 'rgba(76, 175, 80, 0.05)',
+                    }
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="💡 Tips (separados por coma)"
+                  fullWidth
+                  value={newExerciseData.tips.join(', ')}
+                  onChange={(e) =>
+                    setNewExerciseData({
+                      ...newExerciseData,
+                      tips: e.target.value.split(',').map((i) => i.trim()),
+                    })
+                  }
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 3,
+                      backgroundColor: 'rgba(76, 175, 80, 0.05)',
+                    }
+                  }}
+                />
+              </Grid>
+            </Grid>
+          </DialogContent>
+          <DialogActions sx={{ p: 4, gap: 2 }}>
+            <Button
+              onClick={() => setOpenNewExerciseDialog(false)}
+              variant="outlined"
+              sx={{
+                borderRadius: 3,
+                textTransform: 'none',
+                fontWeight: 600,
+                px: 4,
+                py: 1.5
+              }}
             >
-              <MenuItem value='beginner'>Principiante</MenuItem>
-              <MenuItem value='intermediate'>Intermedio</MenuItem>
-              <MenuItem value='advanced'>Avanzado</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField
-            label='Instrucciones (separadas por coma)'
-            fullWidth
-            value={newExerciseData.instructions.join(', ')}
-            onChange={(e) =>
-              setNewExerciseData({
-                ...newExerciseData,
-                instructions: e.target.value.split(',').map((i) => i.trim()),
-              })
-            }
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            label='Tips (separados por coma)'
-            fullWidth
-            value={newExerciseData.tips.join(', ')}
-            onChange={(e) =>
-              setNewExerciseData({
-                ...newExerciseData,
-                tips: e.target.value.split(',').map((i) => i.trim()),
-              })
-            }
-            sx={{ mb: 2 }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenNewExerciseDialog(false)}>
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleCreateNewExercise}
-            variant='contained'
-          >
-            Crear
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Container>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleCreateNewExercise}
+              variant="contained"
+              sx={{
+                borderRadius: 3,
+                textTransform: 'none',
+                fontWeight: 700,
+                px: 4,
+                py: 1.5,
+                background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+                boxShadow: '0 4px 15px rgba(76, 175, 80, 0.4)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #388e3c 0%, #4caf50 100%)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 8px 25px rgba(76, 175, 80, 0.5)',
+                },
+                transition: 'all 0.3s ease'
+              }}
+            >
+              ➕ Crear
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Container>
+
+      <style jsx global>{`
+        @keyframes pulse {
+          0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.8;
+            transform: scale(1.05);
+          }
+        }
+      `}</style>
+    </Box>
   );
 };
 

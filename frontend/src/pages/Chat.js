@@ -282,7 +282,15 @@ const Chat = () => {
         <Grid container spacing={3}>
           {[1, 2, 3].map((item) => (
             <Grid item xs={12} md={4} key={item}>
-              <Skeleton variant="rectangular" height={200} />
+              <Skeleton 
+                variant="rectangular" 
+                height={200} 
+                sx={{ 
+                  borderRadius: 3,
+                  backgroundColor: 'rgba(0,0,0,0.04)',
+                  animation: 'pulse 1.5s ease-in-out 0.5s infinite alternate'
+                }} 
+              />
             </Grid>
           ))}
         </Grid>
@@ -291,29 +299,60 @@ const Chat = () => {
   }
 
   return (
-    <Box sx={{ flexGrow: 1, p: 3, backgroundColor: '#f8fafc', minHeight: '100vh' }}>
+    <Box sx={{ 
+      flexGrow: 1, 
+      p: 3, 
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      minHeight: '100vh',
+      position: 'relative',
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3), transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3), transparent 50%), radial-gradient(circle at 40% 80%, rgba(120, 119, 255, 0.3), transparent 50%)',
+        pointerEvents: 'none'
+      }
+    }}>
       <Typography 
         variant="h3" 
         gutterBottom
         sx={{ 
-          fontWeight: 700,
-          background: 'linear-gradient(45deg, #667eea, #764ba2)',
-          backgroundClip: 'text',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          mb: 4
+          fontWeight: 800,
+          color: 'white',
+          textAlign: 'center',
+          mb: 4,
+          textShadow: '0 4px 20px rgba(0,0,0,0.3)',
+          fontSize: { xs: '2rem', md: '3rem' },
+          position: 'relative',
+          zIndex: 1
         }}
       >
-        Chat en Tiempo Real
+        💬 Chat en Tiempo Real
       </Typography>
       
       {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
+        <Alert 
+          severity="error" 
+          sx={{ 
+            mb: 3,
+            borderRadius: 3,
+            backdropFilter: 'blur(10px)',
+            backgroundColor: 'rgba(244, 67, 54, 0.9)',
+            color: 'white',
+            border: '1px solid rgba(255,255,255,0.2)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+            position: 'relative',
+            zIndex: 1
+          }}
+        >
           {error}
         </Alert>
       )}
       
-      <Grid container spacing={3} sx={{ height: 'calc(100vh - 200px)' }}>
+      <Grid container spacing={3} sx={{ height: 'calc(100vh - 200px)', position: 'relative', zIndex: 1 }}>
         {/* Panel izquierdo */}
         <Grid item xs={12} md={4}>
           <Grid container spacing={2} sx={{ height: '100%' }}>
@@ -324,93 +363,182 @@ const Chat = () => {
                   height: '100%', 
                   display: 'flex', 
                   flexDirection: 'column',
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  color: 'white'
+                  backdropFilter: 'blur(20px)',
+                  backgroundColor: 'rgba(255,255,255,0.15)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: 4,
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+                  overflow: 'hidden',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+                    backgroundColor: 'rgba(255,255,255,0.2)',
+                  }
                 }}
               >
-                <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                      Usuarios en línea ({filteredOnlineUsers.length})
+                <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: 3 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: 'white', fontSize: '1.1rem' }}>
+                      🟢 Usuarios en línea ({filteredOnlineUsers.length})
                     </Typography>
-                    <IconButton size="small" sx={{ color: 'white' }}>
+                    <IconButton 
+                      size="small" 
+                      sx={{ 
+                        color: 'white',
+                        backgroundColor: 'rgba(255,255,255,0.1)',
+                        backdropFilter: 'blur(10px)',
+                        '&:hover': {
+                          backgroundColor: 'rgba(255,255,255,0.2)',
+                          transform: 'rotate(180deg)',
+                        },
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
                       <Refresh />
                     </IconButton>
                   </Box>
                   
                   <TextField
                     size="small"
-                    placeholder="Buscar usuarios..."
+                    placeholder="🔍 Buscar usuarios..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <Search sx={{ color: 'rgba(255,255,255,0.7)' }} />
+                          <Search sx={{ color: 'rgba(255,255,255,0.8)' }} />
                         </InputAdornment>
                       ),
                     }}
                     sx={{
-                      mb: 2,
+                      mb: 3,
                       '& .MuiOutlinedInput-root': {
                         backgroundColor: 'rgba(255,255,255,0.1)',
+                        backdropFilter: 'blur(10px)',
                         color: 'white',
-                        '& fieldset': { borderColor: 'rgba(255,255,255,0.3)' },
-                        '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.5)' },
-                        '&.Mui-focused fieldset': { borderColor: 'white' },
+                        borderRadius: 3,
+                        transition: 'all 0.3s ease',
+                        '& fieldset': { 
+                          borderColor: 'rgba(255,255,255,0.3)',
+                          borderWidth: 1
+                        },
+                        '&:hover fieldset': { 
+                          borderColor: 'rgba(255,255,255,0.6)',
+                          borderWidth: 2
+                        },
+                        '&.Mui-focused fieldset': { 
+                          borderColor: 'white',
+                          borderWidth: 2,
+                          boxShadow: '0 0 20px rgba(255,255,255,0.3)'
+                        },
+                        '&:hover': {
+                          backgroundColor: 'rgba(255,255,255,0.15)',
+                          transform: 'translateY(-1px)'
+                        }
                       },
                       '& .MuiInputBase-input::placeholder': {
-                        color: 'rgba(255,255,255,0.7)',
+                        color: 'rgba(255,255,255,0.8)',
                         opacity: 1,
                       },
                     }}
                   />
                   
-                  <Box sx={{ flexGrow: 1, overflowY: 'auto' }}>
+                  <Box sx={{ flexGrow: 1, overflowY: 'auto', pr: 1 }}>
                     {filteredOnlineUsers.length > 0 ? (
-                      filteredOnlineUsers.map((user) => (
-                        <Fade in key={user.userId || user.id} timeout={300}>
+                      filteredOnlineUsers.map((user, index) => (
+                        <Fade in key={user.userId || user.id} timeout={300 + index * 100}>
                           <Card
                             sx={{
-                              mb: 1,
-                              backgroundColor: 'rgba(255,255,255,0.9)',
+                              mb: 2,
+                              backgroundColor: 'rgba(255,255,255,0.95)',
+                              backdropFilter: 'blur(10px)',
                               cursor: 'pointer',
-                              transition: 'all 0.2s ease-in-out',
+                              borderRadius: 3,
+                              border: '1px solid rgba(255,255,255,0.2)',
+                              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                               '&:hover': {
                                 backgroundColor: 'rgba(255,255,255,1)',
-                                transform: 'translateX(8px)',
+                                transform: 'translateX(8px) translateY(-2px)',
+                                boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
+                                '& .user-avatar': {
+                                  transform: 'scale(1.1)',
+                                  boxShadow: '0 8px 25px rgba(0,0,0,0.2)'
+                                }
                               }
                             }}
                             onClick={() => startConversation(user.userId || user.id)}
                           >
-                            <CardContent sx={{ py: 1.5, px: 2, '&:last-child': { pb: 1.5 } }}>
+                            <CardContent sx={{ py: 2, px: 2.5, '&:last-child': { pb: 2 } }}>
                               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                 <Badge
                                   overlap="circular"
                                   anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                                   badgeContent={
-                                    <Circle sx={{ color: '#4caf50', fontSize: 12 }} />
+                                    <Box sx={{
+                                      width: 12,
+                                      height: 12,
+                                      borderRadius: '50%',
+                                      backgroundColor: '#4caf50',
+                                      border: '2px solid white',
+                                      boxShadow: '0 2px 8px rgba(76, 175, 80, 0.4)'
+                                    }} />
                                   }
                                 >
-                                  <Avatar sx={{ width: 40, height: 40, mr: 2 }}>
-                                    {user.username ? user.username[0].toUpperCase() : 'U'}
+                                  <Avatar 
+                                    className="user-avatar"
+                                    sx={{ 
+                                      width: 44, 
+                                      height: 44, 
+                                      mr: 2,
+                                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                      color: 'white',
+                                      fontWeight: 700,
+                                      fontSize: '1.1rem',
+                                      transition: 'all 0.3s ease',
+                                      boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+                                    }}
+                                  >
+                                    {user.username ? user.username[0].toUpperCase() : '👤'}
                                   </Avatar>
                                 </Badge>
                                 <Box sx={{ flexGrow: 1 }}>
                                   <Typography 
                                     variant="subtitle2" 
-                                    sx={{ color: 'text.primary', fontWeight: 600 }}
+                                    sx={{ 
+                                      color: 'text.primary', 
+                                      fontWeight: 700,
+                                      fontSize: '0.95rem',
+                                      mb: 0.5
+                                    }}
                                   >
                                     {user.username || 'Usuario'}
                                   </Typography>
-                                  <Typography 
-                                    variant="caption" 
-                                    sx={{ color: 'success.main', fontWeight: 500 }}
-                                  >
-                                    En línea
-                                  </Typography>
+                                  <Chip
+                                    label="En línea"
+                                    size="small"
+                                    sx={{
+                                      backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                                      color: '#2e7d32',
+                                      fontWeight: 600,
+                                      fontSize: '0.75rem',
+                                      height: 20,
+                                      border: '1px solid rgba(76, 175, 80, 0.3)'
+                                    }}
+                                  />
                                 </Box>
-                                <IconButton size="small" sx={{ color: 'primary.main' }}>
+                                <IconButton 
+                                  size="small" 
+                                  sx={{ 
+                                    color: 'primary.main',
+                                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                                    '&:hover': {
+                                      backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                                      transform: 'scale(1.1)'
+                                    },
+                                    transition: 'all 0.2s ease'
+                                  }}
+                                >
                                   <PersonAdd />
                                 </IconButton>
                               </Box>
@@ -419,9 +547,17 @@ const Chat = () => {
                         </Fade>
                       ))
                     ) : (
-                      <Card sx={{ backgroundColor: 'rgba(255,255,255,0.9)' }}>
-                        <CardContent sx={{ textAlign: 'center', py: 3 }}>
-                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      <Card sx={{ 
+                        backgroundColor: 'rgba(255,255,255,0.9)',
+                        backdropFilter: 'blur(10px)',
+                        borderRadius: 3,
+                        border: '1px solid rgba(255,255,255,0.2)'
+                      }}>
+                        <CardContent sx={{ textAlign: 'center', py: 4 }}>
+                          <Typography variant="h6" sx={{ color: 'text.secondary', mb: 1, fontSize: '2rem' }}>
+                            😴
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                             {searchTerm ? 'No se encontraron usuarios' : 'No hay usuarios en línea'}
                           </Typography>
                         </CardContent>
@@ -434,45 +570,90 @@ const Chat = () => {
 
             {/* Conversaciones activas */}
             <Grid item xs={12} sx={{ height: '50%' }}>
-              <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                    Conversaciones ({conversations.length})
+              <Card sx={{ 
+                height: '100%', 
+                display: 'flex', 
+                flexDirection: 'column',
+                backdropFilter: 'blur(20px)',
+                backgroundColor: 'rgba(255,255,255,0.15)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                borderRadius: 4,
+                boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+                overflow: 'hidden',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+                  backgroundColor: 'rgba(255,255,255,0.2)',
+                }
+              }}>
+                <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: 3 }}>
+                  <Typography variant="h6" gutterBottom sx={{ 
+                    fontWeight: 700, 
+                    color: 'white',
+                    fontSize: '1.1rem',
+                    mb: 3
+                  }}>
+                    💬 Conversaciones ({conversations.length})
                   </Typography>
-                  <Box sx={{ flexGrow: 1, overflowY: 'auto' }}>
+                  <Box sx={{ flexGrow: 1, overflowY: 'auto', pr: 1 }}>
                     {conversations.length > 0 ? (
-                      conversations.map((conversation) => {
+                      conversations.map((conversation, index) => {
                         const otherUser = getOtherUser(conversation);
                         const isActive = activeConversation?.id === conversation.id;
                         return (
-                          <Zoom in key={conversation.id} timeout={300}>
+                          <Zoom in key={conversation.id} timeout={300 + index * 100}>
                             <Card
                               sx={{
-                                mb: 1,
+                                mb: 2,
                                 cursor: 'pointer',
-                                backgroundColor: isActive ? 'primary.light' : 'background.paper',
-                                border: isActive ? 2 : 1,
-                                borderColor: isActive ? 'primary.main' : 'divider',
-                                transition: 'all 0.2s ease-in-out',
+                                backgroundColor: isActive ? 'rgba(102, 126, 234, 0.9)' : 'rgba(255,255,255,0.95)',
+                                backdropFilter: 'blur(10px)',
+                                border: isActive ? '2px solid rgba(255,255,255,0.5)' : '1px solid rgba(255,255,255,0.2)',
+                                borderRadius: 3,
+                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                transform: isActive ? 'scale(1.02)' : 'scale(1)',
                                 '&:hover': {
-                                  backgroundColor: isActive ? 'primary.light' : 'action.hover',
-                                  transform: 'translateY(-2px)',
-                                  boxShadow: 2,
+                                  backgroundColor: isActive ? 'rgba(102, 126, 234, 1)' : 'rgba(255,255,255,1)',
+                                  transform: isActive ? 'scale(1.02) translateY(-2px)' : 'translateY(-4px) scale(1.02)',
+                                  boxShadow: '0 15px 35px rgba(0,0,0,0.15)',
+                                  '& .conversation-avatar': {
+                                    transform: 'scale(1.1)',
+                                    boxShadow: '0 8px 25px rgba(0,0,0,0.2)'
+                                  }
                                 }
                               }}
                               onClick={() => selectConversation(conversation)}
                             >
-                              <CardContent sx={{ py: 1.5, px: 2, '&:last-child': { pb: 1.5 } }}>
+                              <CardContent sx={{ py: 2, px: 2.5, '&:last-child': { pb: 2 } }}>
                                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                  <Avatar sx={{ width: 40, height: 40, mr: 2 }}>
-                                    {otherUser ? (otherUser.username || otherUser.email || 'U')[0].toUpperCase() : 'C'}
+                                  <Avatar 
+                                    className="conversation-avatar"
+                                    sx={{ 
+                                      width: 44, 
+                                      height: 44, 
+                                      mr: 2,
+                                      background: isActive 
+                                        ? 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%)'
+                                        : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                      color: 'white',
+                                      fontWeight: 700,
+                                      fontSize: '1.1rem',
+                                      transition: 'all 0.3s ease',
+                                      boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+                                      border: isActive ? '2px solid rgba(255,255,255,0.3)' : 'none'
+                                    }}
+                                  >
+                                    {otherUser ? (otherUser.username || otherUser.email || 'U')[0].toUpperCase() : '💬'}
                                   </Avatar>
                                   <Box sx={{ flexGrow: 1, minWidth: 0 }}>
                                     <Typography 
                                       variant="subtitle2" 
                                       sx={{ 
-                                        fontWeight: 600,
-                                        color: isActive ? 'primary.contrastText' : 'text.primary'
+                                        fontWeight: 700,
+                                        color: isActive ? 'white' : 'text.primary',
+                                        fontSize: '0.95rem',
+                                        mb: 0.5
                                       }}
                                       noWrap
                                     >
@@ -481,17 +662,30 @@ const Chat = () => {
                                     <Typography 
                                       variant="caption" 
                                       sx={{ 
-                                        color: isActive ? 'primary.contrastText' : 'text.secondary'
+                                        color: isActive ? 'rgba(255,255,255,0.8)' : 'text.secondary',
+                                        fontWeight: 500,
+                                        fontSize: '0.8rem'
                                       }}
                                       noWrap
                                     >
                                       {typeof conversation.lastMessage === 'string' 
                                         ? conversation.lastMessage 
-                                        : 'Iniciar conversación'
+                                        : '✨ Iniciar conversación'
                                       }
                                     </Typography>
                                   </Box>
-                                  <IconButton size="small">
+                                  <IconButton 
+                                    size="small"
+                                    sx={{
+                                      color: isActive ? 'rgba(255,255,255,0.8)' : 'text.secondary',
+                                      backgroundColor: isActive ? 'rgba(255,255,255,0.1)' : 'transparent',
+                                      '&:hover': {
+                                        backgroundColor: isActive ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.05)',
+                                        transform: 'scale(1.1)'
+                                      },
+                                      transition: 'all 0.2s ease'
+                                    }}
+                                  >
                                     <MoreVert />
                                   </IconButton>
                                 </Box>
@@ -501,12 +695,20 @@ const Chat = () => {
                         );
                       })
                     ) : (
-                      <Card>
-                        <CardContent sx={{ textAlign: 'center', py: 3 }}>
-                          <Typography variant="body2" color="text.secondary">
+                      <Card sx={{
+                        backgroundColor: 'rgba(255,255,255,0.9)',
+                        backdropFilter: 'blur(10px)',
+                        borderRadius: 3,
+                        border: '1px solid rgba(255,255,255,0.2)'
+                      }}>
+                        <CardContent sx={{ textAlign: 'center', py: 4 }}>
+                          <Typography variant="h6" sx={{ fontSize: '2rem', mb: 1 }}>
+                            💭
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600, mb: 0.5 }}>
                             No hay conversaciones
                           </Typography>
-                          <Typography variant="caption" color="text.secondary">
+                          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
                             Haz click en un usuario para iniciar una conversación
                           </Typography>
                         </CardContent>
@@ -526,7 +728,16 @@ const Chat = () => {
               height: '100%', 
               display: 'flex', 
               flexDirection: 'column',
-              boxShadow: 3,
+              backdropFilter: 'blur(20px)',
+              backgroundColor: 'rgba(255,255,255,0.95)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: 4,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+              overflow: 'hidden',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              '&:hover': {
+                boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
+              }
             }}
           >
             {activeConversation ? (
@@ -534,32 +745,76 @@ const Chat = () => {
                 {/* Header del chat */}
                 <Box
                   sx={{
-                    p: 2,
+                    p: 3,
                     borderBottom: 1,
-                    borderColor: 'divider',
-                    background: 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)',
-                    color: 'white'
+                    borderColor: 'rgba(255,255,255,0.2)',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    color: 'white',
+                    position: 'relative',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.1), transparent 50%)',
+                      pointerEvents: 'none'
+                    }
                   }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Avatar sx={{ mr: 2, bgcolor: 'rgba(255,255,255,0.2)' }}>
-                        {getOtherUser(activeConversation)?.username?.[0]?.toUpperCase() || 'U'}
+                      <Avatar sx={{ 
+                        mr: 3, 
+                        width: 50,
+                        height: 50,
+                        bgcolor: 'rgba(255,255,255,0.2)',
+                        backdropFilter: 'blur(10px)',
+                        border: '2px solid rgba(255,255,255,0.3)',
+                        fontWeight: 700,
+                        fontSize: '1.2rem',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          transform: 'scale(1.1)',
+                          boxShadow: '0 8px 25px rgba(0,0,0,0.3)'
+                        }
+                      }}>
+                        {getOtherUser(activeConversation)?.username?.[0]?.toUpperCase() || '👤'}
                       </Avatar>
                       <Box>
-                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                        <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1.2rem', mb: 0.5 }}>
                           {getOtherUser(activeConversation)?.username || 
                            getOtherUser(activeConversation)?.email || 'Chat'}
                         </Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Circle sx={{ fontSize: 12, mr: 0.5, color: '#4caf50' }} />
-                          <Typography variant="caption">
+                          <Box sx={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: '50%',
+                            backgroundColor: '#4caf50',
+                            mr: 1,
+                            boxShadow: '0 0 10px rgba(76, 175, 80, 0.5)',
+                            animation: 'pulse 2s infinite'
+                          }} />
+                          <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.85rem' }}>
                             En línea
                           </Typography>
                         </Box>
                       </Box>
                     </Box>
-                    <IconButton sx={{ color: 'white' }}>
+                    <IconButton 
+                      sx={{ 
+                        color: 'white',
+                        backgroundColor: 'rgba(255,255,255,0.1)',
+                        backdropFilter: 'blur(10px)',
+                        '&:hover': {
+                          backgroundColor: 'rgba(255,255,255,0.2)',
+                          transform: 'scale(1.1)'
+                        },
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
                       <MoreVert />
                     </IconButton>
                   </Box>
@@ -570,10 +825,13 @@ const Chat = () => {
                   sx={{ 
                     flexGrow: 1, 
                     overflow: 'auto', 
-                    p: 2,
-                    backgroundColor: '#f8fafc',
-                    backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(0,0,0,.15) 1px, transparent 0)',
-                    backgroundSize: '20px 20px'
+                    p: 3,
+                    background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+                    backgroundImage: `
+                      radial-gradient(circle at 25% 25%, rgba(102, 126, 234, 0.05) 0%, transparent 25%),
+                      radial-gradient(circle at 75% 75%, rgba(118, 75, 162, 0.05) 0%, transparent 25%)
+                    `,
+                    position: 'relative'
                   }}
                 >
                   {messages.length > 0 ? (
@@ -582,53 +840,88 @@ const Chat = () => {
                       const showAvatar = index === 0 || messages[index - 1].senderId !== message.senderId;
                       
                       return (
-                        <Fade in key={message._id || message.id} timeout={300}>
+                        <Fade in key={message._id || message.id} timeout={300 + index * 50}>
                           <Box
                             sx={{
                               display: 'flex',
                               justifyContent: isOwnMessage ? 'flex-end' : 'flex-start',
-                              mb: 1,
+                              mb: 2,
                               alignItems: 'flex-end'
                             }}
                           >
                             {!isOwnMessage && showAvatar && (
                               <Avatar 
                                 sx={{ 
-                                  width: 32, 
-                                  height: 32, 
-                                  mr: 1,
-                                  bgcolor: 'primary.main'
+                                  width: 36, 
+                                  height: 36, 
+                                  mr: 2,
+                                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                  color: 'white',
+                                  fontWeight: 700,
+                                  boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+                                  transition: 'all 0.3s ease',
+                                  '&:hover': {
+                                    transform: 'scale(1.1)',
+                                    boxShadow: '0 8px 25px rgba(0,0,0,0.2)'
+                                  }
                                 }}
                               >
-                                {message.senderUsername?.[0]?.toUpperCase() || 'U'}
+                                {message.senderUsername?.[0]?.toUpperCase() || '👤'}
                               </Avatar>
                             )}
                             {!isOwnMessage && !showAvatar && (
-                              <Box sx={{ width: 32, mr: 1 }} />
+                              <Box sx={{ width: 36, mr: 2 }} />
                             )}
                             
                             <Paper
-                              elevation={2}
+                              elevation={0}
                               sx={{
-                                p: 1.5,
+                                p: 2,
                                 maxWidth: '70%',
-                                backgroundColor: isOwnMessage ? 'primary.main' : 'white',
+                                background: isOwnMessage 
+                                  ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                                  : 'rgba(255,255,255,0.9)',
+                                backdropFilter: 'blur(10px)',
+                                border: isOwnMessage 
+                                  ? '1px solid rgba(255,255,255,0.2)'
+                                  : '1px solid rgba(0,0,0,0.1)',
                                 color: isOwnMessage ? 'white' : 'text.primary',
-                                borderRadius: 2,
-                                borderBottomRightRadius: isOwnMessage ? 4 : 16,
-                                borderBottomLeftRadius: isOwnMessage ? 16 : 4,
+                                borderRadius: 3,
+                                borderBottomRightRadius: isOwnMessage ? 8 : 20,
+                                borderBottomLeftRadius: isOwnMessage ? 20 : 8,
                                 position: 'relative',
-                                '&::before': isOwnMessage ? {} : {
+                                boxShadow: isOwnMessage 
+                                  ? '0 8px 25px rgba(102, 126, 234, 0.3)'
+                                  : '0 4px 15px rgba(0,0,0,0.1)',
+                                transition: 'all 0.3s ease',
+                                '&:hover': {
+                                  transform: 'translateY(-2px)',
+                                  boxShadow: isOwnMessage 
+                                    ? '0 12px 35px rgba(102, 126, 234, 0.4)'
+                                    : '0 8px 25px rgba(0,0,0,0.15)'
+                                },
+                                '&::before': !isOwnMessage ? {
                                   content: '""',
                                   position: 'absolute',
                                   bottom: 0,
-                                  left: -8,
+                                  left: -10,
                                   width: 0,
                                   height: 0,
-                                  borderLeft: '8px solid transparent',
-                                  borderRight: '8px solid white',
-                                  borderBottom: '8px solid white',
-                                }
+                                  borderLeft: '10px solid transparent',
+                                  borderRight: '10px solid rgba(255,255,255,0.9)',
+                                  borderBottom: '10px solid rgba(255,255,255,0.9)',
+                                } : {},
+                                '&::after': isOwnMessage ? {
+                                  content: '""',
+                                  position: 'absolute',
+                                  bottom: 0,
+                                  right: -10,
+                                  width: 0,
+                                  height: 0,
+                                  borderLeft: '10px solid #764ba2',
+                                  borderRight: '10px solid transparent',
+                                  borderBottom: '10px solid #764ba2',
+                                } : {}
                               }}
                             >
                               {!isOwnMessage && showAvatar && (
@@ -636,24 +929,31 @@ const Chat = () => {
                                   variant="caption" 
                                   sx={{ 
                                     color: 'primary.main',
-                                    fontWeight: 600,
+                                    fontWeight: 700,
                                     display: 'block',
-                                    mb: 0.5
+                                    mb: 1,
+                                    fontSize: '0.8rem'
                                   }}
                                 >
                                   {message.senderUsername || 'Usuario'}
                                 </Typography>
                               )}
-                              <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>
+                              <Typography variant="body1" sx={{ 
+                                wordBreak: 'break-word',
+                                lineHeight: 1.5,
+                                fontSize: '0.95rem'
+                              }}>
                                 {message.content}
                               </Typography>
                               <Typography 
                                 variant="caption" 
                                 sx={{ 
-                                  color: isOwnMessage ? 'rgba(255,255,255,0.7)' : 'text.secondary',
+                                  color: isOwnMessage ? 'rgba(255,255,255,0.8)' : 'text.secondary',
                                   display: 'block',
                                   textAlign: 'right',
-                                  mt: 0.5
+                                  mt: 1,
+                                  fontSize: '0.75rem',
+                                  fontWeight: 500
                                 }}
                               >
                                 {formatTime(message.createdAt)}
@@ -664,11 +964,21 @@ const Chat = () => {
                       );
                     })
                   ) : (
-                    <Box sx={{ textAlign: 'center', py: 4 }}>
-                      <Typography variant="h6" color="text.secondary" gutterBottom>
+                    <Box sx={{ 
+                      textAlign: 'center', 
+                      py: 6,
+                      background: 'rgba(255,255,255,0.5)',
+                      backdropFilter: 'blur(10px)',
+                      borderRadius: 4,
+                      border: '1px solid rgba(255,255,255,0.2)'
+                    }}>
+                      <Typography variant="h4" sx={{ fontSize: '3rem', mb: 2 }}>
+                        💬
+                      </Typography>
+                      <Typography variant="h6" color="text.secondary" gutterBottom sx={{ fontWeight: 700 }}>
                         ¡Inicia la conversación!
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
                         Envía tu primer mensaje para comenzar a chatear
                       </Typography>
                     </Box>
@@ -676,20 +986,33 @@ const Chat = () => {
                   
                   {isTyping && (
                     <Fade in>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                        <Avatar sx={{ width: 32, height: 32, mr: 1, bgcolor: 'grey.400' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                        <Avatar sx={{ 
+                          width: 36, 
+                          height: 36, 
+                          mr: 2, 
+                          bgcolor: 'grey.400',
+                          animation: 'pulse 1.5s infinite'
+                        }}>
                           <EmojiEmotions />
                         </Avatar>
                         <Paper
                           sx={{
-                            p: 1.5,
-                            backgroundColor: 'grey.100',
-                            borderRadius: 2,
-                            borderBottomLeftRadius: 4,
+                            p: 2,
+                            backgroundColor: 'rgba(255,255,255,0.9)',
+                            backdropFilter: 'blur(10px)',
+                            borderRadius: 3,
+                            borderBottomLeftRadius: 8,
+                            border: '1px solid rgba(0,0,0,0.1)',
+                            boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+                            animation: 'pulse 1.5s infinite'
                           }}
                         >
-                          <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                            Escribiendo...
+                          <Typography variant="body2" color="text.secondary" sx={{ 
+                            fontStyle: 'italic',
+                            fontWeight: 500
+                          }}>
+                            ✍️ Escribiendo...
                           </Typography>
                         </Paper>
                       </Box>
@@ -702,17 +1025,38 @@ const Chat = () => {
                 {/* Input para escribir mensaje */}
                 <Box 
                   sx={{ 
-                    p: 2, 
+                    p: 3, 
                     borderTop: 1, 
-                    borderColor: 'divider',
-                    backgroundColor: 'white'
+                    borderColor: 'rgba(0,0,0,0.1)',
+                    backgroundColor: 'rgba(255,255,255,0.95)',
+                    backdropFilter: 'blur(10px)'
                   }}
                 >
-                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end' }}>
-                    <IconButton color="primary">
+                  <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-end' }}>
+                    <IconButton 
+                      color="primary"
+                      sx={{
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        '&:hover': {
+                          backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                          transform: 'scale(1.1)'
+                        },
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
                       <AttachFile />
                     </IconButton>
-                    <IconButton color="primary">
+                    <IconButton 
+                      color="primary"
+                      sx={{
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        '&:hover': {
+                          backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                          transform: 'scale(1.1)'
+                        },
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
                       <EmojiEmotions />
                     </IconButton>
                     <TextField
@@ -722,13 +1066,35 @@ const Chat = () => {
                       value={newMessage}
                       onChange={(e) => handleTyping(e.target.value)}
                       onKeyPress={handleKeyPress}
-                      placeholder="Escribe un mensaje..."
+                      placeholder="💭 Escribe un mensaje..."
                       variant="outlined"
                       size="small"
                       sx={{
                         '& .MuiOutlinedInput-root': {
-                          borderRadius: 3,
-                          backgroundColor: '#f8fafc',
+                          borderRadius: 4,
+                          backgroundColor: 'rgba(248, 250, 252, 0.8)',
+                          backdropFilter: 'blur(10px)',
+                          border: '1px solid rgba(0,0,0,0.1)',
+                          transition: 'all 0.3s ease',
+                          '& fieldset': {
+                            borderColor: 'rgba(0,0,0,0.1)'
+                          },
+                          '&:hover fieldset': {
+                            borderColor: 'rgba(102, 126, 234, 0.5)'
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#667eea',
+                            borderWidth: 2,
+                            boxShadow: '0 0 20px rgba(102, 126, 234, 0.2)'
+                          },
+                          '&:hover': {
+                            backgroundColor: 'rgba(248, 250, 252, 1)',
+                            transform: 'translateY(-1px)'
+                          }
+                        },
+                        '& .MuiInputBase-input::placeholder': {
+                          color: 'rgba(0,0,0,0.6)',
+                          opacity: 1,
                         }
                       }}
                     />
@@ -737,14 +1103,28 @@ const Chat = () => {
                       onClick={sendMessage}
                       disabled={!newMessage.trim()}
                       sx={{
-                        backgroundColor: newMessage.trim() ? 'primary.main' : 'grey.300',
+                        background: newMessage.trim() 
+                          ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                          : 'linear-gradient(135deg, #e0e7ff 0%, #f1f5f9 100%)',
                         color: 'white',
+                        width: 48,
+                        height: 48,
+                        boxShadow: newMessage.trim() 
+                          ? '0 4px 15px rgba(102, 126, 234, 0.4)'
+                          : '0 2px 8px rgba(0,0,0,0.1)',
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                         '&:hover': {
-                          backgroundColor: newMessage.trim() ? 'primary.dark' : 'grey.400',
+                          background: newMessage.trim() 
+                            ? 'linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)'
+                            : 'linear-gradient(135deg, #e0e7ff 0%, #f1f5f9 100%)',
+                          transform: newMessage.trim() ? 'scale(1.1) rotate(15deg)' : 'none',
+                          boxShadow: newMessage.trim() 
+                            ? '0 8px 25px rgba(102, 126, 234, 0.5)'
+                            : '0 2px 8px rgba(0,0,0,0.1)'
                         },
                         '&:disabled': {
-                          backgroundColor: 'grey.300',
-                          color: 'grey.500',
+                          background: 'linear-gradient(135deg, #e0e7ff 0%, #f1f5f9 100%)',
+                          color: 'rgba(0,0,0,0.3)',
                         }
                       }}
                     >
@@ -761,33 +1141,71 @@ const Chat = () => {
                   justifyContent: 'center',
                   height: '100%',
                   textAlign: 'center',
-                  p: 4
+                  p: 4,
+                  background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)'
                 }}
               >
-                <Box>
+                <Box sx={{ maxWidth: 400 }}>
                   <Avatar
                     sx={{
-                      width: 80,
-                      height: 80,
+                      width: 100,
+                      height: 100,
                       mx: 'auto',
-                      mb: 2,
-                      bgcolor: 'primary.main'
+                      mb: 3,
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)',
+                      animation: 'pulse 2s infinite'
                     }}
                   >
-                    <Send sx={{ fontSize: 40 }} />
+                    <Send sx={{ fontSize: 50 }} />
                   </Avatar>
-                  <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-                    Selecciona una conversación
+                  <Typography variant="h4" gutterBottom sx={{ 
+                    fontWeight: 800,
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    mb: 2
+                  }}>
+                    💬 Selecciona una conversación
                   </Typography>
-                  <Typography variant="body1" color="text.secondary">
-                    Elige un usuario de la lista para iniciar una conversación
+                  <Typography variant="body1" color="text.secondary" sx={{ 
+                    fontWeight: 500,
+                    fontSize: '1.1rem',
+                    lineHeight: 1.6
+                  }}>
+                    Elige un usuario de la lista para iniciar una conversación increíble
                   </Typography>
+                  <Box sx={{ 
+                    mt: 3,
+                    p: 2,
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    borderRadius: 3,
+                    border: '1px solid rgba(102, 126, 234, 0.2)'
+                  }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                      💡 Tip: Los usuarios en línea aparecen en tiempo real
+                    </Typography>
+                  </Box>
                 </Box>
               </Box>
             )}
           </Card>
         </Grid>
       </Grid>
+
+      <style jsx global>{`
+        @keyframes pulse {
+          0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.8;
+            transform: scale(1.05);
+          }
+        }
+      `}</style>
     </Box>
   );
 };

@@ -34,7 +34,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 
-const Routines = () => {
+const Dashboard = () => {
   const { user } = useAuth();
   const [routines, setRoutines] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -1189,4 +1189,5 @@ const Routines = () => {
   );
 };
 
-export default Routines;
+export default Dashboard;
+

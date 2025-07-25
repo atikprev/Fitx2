@@ -15,7 +15,13 @@ import {
   Select,
   MenuItem,
   Divider,
-  Alert
+  Alert,
+  Chip,
+  IconButton,
+  InputAdornment,
+  Fade,
+  Slide,
+  LinearProgress
 } from '@mui/material';
 import {
   Person,
@@ -23,7 +29,16 @@ import {
   Save,
   MonitorWeight,
   Height,
-  FitnessCenter
+  FitnessCenter,
+  Cancel,
+  AccountCircle,
+  Email,
+  CalendarToday,
+  Wc,
+  TrendingUp,
+  PhotoCamera,
+  Timeline,
+  LocalFireDepartment
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -113,278 +128,636 @@ const Profile = () => {
   };
 
   const getBMICategory = (bmi) => {
-    if (bmi < 18.5) return { category: 'Bajo peso', color: 'info' };
-    if (bmi < 25) return { category: 'Normal', color: 'success' };
-    if (bmi < 30) return { category: 'Sobrepeso', color: 'warning' };
-    return { category: 'Obesidad', color: 'error' };
+    if (bmi < 18.5) return { category: 'Bajo peso', color: 'info', progress: 25 };
+    if (bmi < 25) return { category: 'Normal', color: 'success', progress: 75 };
+    if (bmi < 30) return { category: 'Sobrepeso', color: 'warning', progress: 60 };
+    return { category: 'Obesidad', color: 'error', progress: 40 };
   };
 
-  const StatCard = ({ title, value, icon, color }) => (
-    <Card elevation={2} sx={{ height: '100%' }}>
-      <CardContent>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          {React.cloneElement(icon, { sx: { color: color, mr: 2 } })}
-          <Typography variant="h6" component="div">
-            {title}
+  const getFitnessLevelInfo = (level) => {
+    switch (level) {
+      case 'beginner':
+        return { label: 'Principiante', color: 'info', icon: '🌱' };
+      case 'intermediate':
+        return { label: 'Intermedio', color: 'warning', icon: '💪' };
+      case 'advanced':
+        return { label: 'Avanzado', color: 'success', icon: '🏆' };
+      default:
+        return { label: 'No definido', color: 'default', icon: '❓' };
+    }
+  };
+
+  const StatCard = ({ title, value, icon, color, subtitle, progress }) => (
+    <Slide direction="up" in={true} timeout={600}>
+      <Card 
+        elevation={0}
+        sx={{ 
+          height: '100%',
+          background: 'rgba(255, 255, 255, 0.9)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          borderRadius: 4,
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            transform: 'translateY(-8px)',
+            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
+          }
+        }}
+      >
+        <CardContent sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 50,
+                height: 50,
+                borderRadius: '50%',
+                background: `linear-gradient(135deg, ${color} 0%, ${color}aa 100%)`,
+                mr: 2,
+                boxShadow: `0 8px 25px ${color}33`,
+              }}
+            >
+              {React.cloneElement(icon, { sx: { color: 'white', fontSize: 24 } })}
+            </Box>
+            <Typography variant="h6" component="div" sx={{ fontWeight: 600, color: 'text.primary' }}>
+              {title}
+            </Typography>
+          </Box>
+          <Typography 
+            variant="h3" 
+            component="div" 
+            sx={{ 
+              fontWeight: 700,
+              background: `linear-gradient(135deg, ${color} 0%, ${color}aa 100%)`,
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              mb: 1
+            }}
+          >
+            {value || 'N/A'}
           </Typography>
-        </Box>
-        <Typography variant="h4" component="div">
-          {value || 'N/A'}
-        </Typography>
-      </CardContent>
-    </Card>
+          {subtitle && (
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              {subtitle}
+            </Typography>
+          )}
+          {progress && (
+            <LinearProgress
+              variant="determinate"
+              value={progress}
+              sx={{
+                height: 6,
+                borderRadius: 3,
+                backgroundColor: `${color}22`,
+                '& .MuiLinearProgress-bar': {
+                  background: `linear-gradient(90deg, ${color} 0%, ${color}aa 100%)`,
+                  borderRadius: 3,
+                },
+              }}
+            />
+          )}
+        </CardContent>
+      </Card>
+    </Slide>
   );
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4, px: { xs: 2, sm: 3 } }}>
-      <Grid container spacing={3}>
-        {/* Header */}
-        <Grid item xs={12}>
-          <Paper 
-            sx={{ 
-              p: 4, 
-              mb: 3,
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              color: 'white'
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Avatar
-              sx={{ 
-                width: 100, 
-                height: 100, 
-                mr: 4,
-                border: '4px solid rgba(255,255,255,0.3)',
-                fontSize: '2rem',
-                fontWeight: 700
-              }}
-              src={user?.profile?.avatar}
-            >
-              {user?.username?.charAt(0).toUpperCase()}
-            </Avatar>
-            <Box>
-              <Typography variant="h3" gutterBottom sx={{ fontWeight: 700 }}>
-                {user?.username}
-              </Typography>
-              <Typography variant="h6" sx={{ opacity: 0.9 }}>
-                {user?.email}
-              </Typography>
-              <Typography variant="body1" sx={{ opacity: 0.8, mt: 1 }}>
-                Miembro desde {new Date(user?.createdAt || Date.now()).toLocaleDateString('es-ES', {
-                  year: 'numeric',
-                  month: 'long'
-                })}
-              </Typography>
-            </Box>
-          </Box>
-          </Paper>
-        </Grid>
-
-        {/* Messages */}
-        {message && (
-          <Grid item xs={12}>
-            <Alert severity="success">{message}</Alert>
-          </Grid>
-        )}
-
-        {error && (
-          <Grid item xs={12}>
-            <Alert severity="error">{error}</Alert>
-          </Grid>
-        )}
-
-        {/* Stats Cards */}
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Peso"
-            value={formData.profile.weight ? `${formData.profile.weight} kg` : null}
-            icon={<MonitorWeight />}
-            color="primary.main"
-          />
-        </Grid>
-        
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Altura"
-            value={formData.profile.height ? `${formData.profile.height} cm` : null}
-            icon={<Height />}
-            color="secondary.main"
-          />
-        </Grid>
-        
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="IMC"
-            value={calculateBMI()}
-            icon={<FitnessCenter />}
-            color="success.main"
-          />
-        </Grid>
-        
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Edad"
-            value={formData.profile.age ? `${formData.profile.age} años` : null}
-            icon={<Person />}
-            color="info.main"
-          />
-        </Grid>
-
-        {/* BMI Info */}
-        {calculateBMI() && (
-          <Grid item xs={12}>
-            <Paper sx={{ p: 2 }}>
-              <Typography variant="h6" gutterBottom>
-                Información del IMC
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Typography variant="body1">
-                  Tu IMC es <strong>{calculateBMI()}</strong>
-                </Typography>
-                <Typography 
-                  variant="body1" 
-                  color={`${getBMICategory(calculateBMI()).color}.main`}
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        py: 4,
+      }}
+    >
+      <Container maxWidth="lg">
+        <Fade in={true} timeout={800}>
+          <Grid container spacing={4}>
+            {/* Header Profile Card */}
+            <Grid item xs={12}>
+              <Slide direction="down" in={true} timeout={600}>
+                <Paper 
+                  elevation={12}
+                  sx={{ 
+                    p: 4,
+                    background: 'rgba(255, 255, 255, 0.95)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    borderRadius: 6,
+                    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.1)',
+                  }}
                 >
-                  ({getBMICategory(calculateBMI()).category})
-                </Typography>
-              </Box>
-            </Paper>
-          </Grid>
-        )}
+                  <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 4 }}>
+                    <Box sx={{ position: 'relative' }}>
+                      <Avatar
+                        sx={{ 
+                          width: { xs: 80, md: 120 }, 
+                          height: { xs: 80, md: 120 },
+                          border: '6px solid rgba(102, 126, 234, 0.2)',
+                          fontSize: { xs: '2rem', md: '3rem' },
+                          fontWeight: 700,
+                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                          boxShadow: '0 15px 35px rgba(102, 126, 234, 0.3)',
+                        }}
+                        src={user?.profile?.avatar}
+                      >
+                        {user?.username?.charAt(0).toUpperCase()}
+                      </Avatar>
+                      <IconButton
+                        sx={{
+                          position: 'absolute',
+                          bottom: -5,
+                          right: -5,
+                          backgroundColor: 'primary.main',
+                          color: 'white',
+                          width: 35,
+                          height: 35,
+                          '&:hover': {
+                            backgroundColor: 'primary.dark',
+                            transform: 'scale(1.1)',
+                          },
+                        }}
+                      >
+                        <PhotoCamera fontSize="small" />
+                      </IconButton>
+                    </Box>
+                    
+                    <Box sx={{ flex: 1, minWidth: 250 }}>
+                      <Typography 
+                        variant="h3" 
+                        gutterBottom 
+                        sx={{ 
+                          fontWeight: 800,
+                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                          backgroundClip: 'text',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          mb: 1,
+                        }}
+                      >
+                        {user?.username}
+                      </Typography>
+                      
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                        <Email sx={{ mr: 1, color: 'text.secondary', fontSize: 20 }} />
+                        <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 500 }}>
+                          {user?.email}
+                        </Typography>
+                      </Box>
+                      
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                        <CalendarToday sx={{ mr: 1, color: 'text.secondary', fontSize: 20 }} />
+                        <Typography variant="body1" color="text.secondary">
+                          Miembro desde {new Date(user?.createdAt || Date.now()).toLocaleDateString('es-ES', {
+                            year: 'numeric',
+                            month: 'long'
+                          })}
+                        </Typography>
+                      </Box>
 
-        {/* Profile Information */}
-        <Grid item xs={12}>
-          <Paper sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h6">
-                Información Personal
-              </Typography>
-              {!editing ? (
-                <Button
-                  variant="outlined"
-                  startIcon={<Edit />}
-                  onClick={() => setEditing(true)}
-                >
-                  Editar
-                </Button>
-              ) : (
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  <Button
-                    variant="outlined"
-                    onClick={() => setEditing(false)}
+                      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                        {formData.profile.fitnessLevel && (
+                          <Chip
+                            icon={<TrendingUp />}
+                            label={`${getFitnessLevelInfo(formData.profile.fitnessLevel).icon} ${getFitnessLevelInfo(formData.profile.fitnessLevel).label}`}
+                            color={getFitnessLevelInfo(formData.profile.fitnessLevel).color}
+                            variant="filled"
+                            sx={{ fontWeight: 600 }}
+                          />
+                        )}
+                        <Chip
+                          icon={<LocalFireDepartment />}
+                          label="Activo"
+                          color="success"
+                          variant="outlined"
+                          sx={{ fontWeight: 600 }}
+                        />
+                      </Box>
+                    </Box>
+                  </Box>
+                </Paper>
+              </Slide>
+            </Grid>
+
+            {/* Messages */}
+            {message && (
+              <Grid item xs={12}>
+                <Fade in={true}>
+                  <Alert 
+                    severity="success" 
+                    sx={{ 
+                      borderRadius: 3,
+                      '& .MuiAlert-icon': { fontSize: '1.5rem' }
+                    }}
                   >
-                    Cancelar
-                  </Button>
-                  <Button
-                    variant="contained"
-                    startIcon={<Save />}
-                    onClick={handleSubmit}
-                  >
-                    Guardar
-                  </Button>
-                </Box>
-              )}
-            </Box>
-
-            <Divider sx={{ mb: 3 }} />
-
-            <Box component="form" onSubmit={handleSubmit}>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Nombre"
-                    name="firstName"
-                    value={formData.profile.firstName}
-                    onChange={handleChange}
-                    disabled={!editing}
-                  />
-                </Grid>
-                
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Apellido"
-                    name="lastName"
-                    value={formData.profile.lastName}
-                    onChange={handleChange}
-                    disabled={!editing}
-                  />
-                </Grid>
-                
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Edad"
-                    name="age"
-                    type="number"
-                    value={formData.profile.age}
-                    onChange={handleChange}
-                    disabled={!editing}
-                  />
-                </Grid>
-                
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth>
-                    <InputLabel>Género</InputLabel>
-                    <Select
-                      name="gender"
-                      value={formData.profile.gender}
-                      onChange={handleChange}
-                      disabled={!editing}
-                    >
-                      <MenuItem value="male">Masculino</MenuItem>
-                      <MenuItem value="female">Femenino</MenuItem>
-                      <MenuItem value="other">Otro</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Altura (cm)"
-                    name="height"
-                    type="number"
-                    value={formData.profile.height}
-                    onChange={handleChange}
-                    disabled={!editing}
-                  />
-                </Grid>
-                
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Peso (kg)"
-                    name="weight"
-                    type="number"
-                    value={formData.profile.weight}
-                    onChange={handleChange}
-                    disabled={!editing}
-                  />
-                </Grid>
-                
-                <Grid item xs={12}>
-                  <FormControl fullWidth>
-                    <InputLabel>Nivel de Fitness</InputLabel>
-                    <Select
-                      name="fitnessLevel"
-                      value={formData.profile.fitnessLevel}
-                      onChange={handleChange}
-                      disabled={!editing}
-                    >
-                      <MenuItem value="beginner">Principiante</MenuItem>
-                      <MenuItem value="intermediate">Intermedio</MenuItem>
-                      <MenuItem value="advanced">Avanzado</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
+                    {message}
+                  </Alert>
+                </Fade>
               </Grid>
-            </Box>
-          </Paper>
-        </Grid>
-      </Grid>
-    </Container>
+            )}
+
+            {error && (
+              <Grid item xs={12}>
+                <Fade in={true}>
+                  <Alert 
+                    severity="error"
+                    sx={{ 
+                      borderRadius: 3,
+                      '& .MuiAlert-icon': { fontSize: '1.5rem' }
+                    }}
+                  >
+                    {error}
+                  </Alert>
+                </Fade>
+              </Grid>
+            )}
+
+            {/* Stats Cards */}
+            <Grid item xs={12} sm={6} md={3}>
+              <StatCard
+                title="Peso"
+                value={formData.profile.weight ? `${formData.profile.weight} kg` : null}
+                icon={<MonitorWeight />}
+                color="#667eea"
+                subtitle="Peso actual"
+              />
+            </Grid>
+            
+            <Grid item xs={12} sm={6} md={3}>
+              <StatCard
+                title="Altura"
+                value={formData.profile.height ? `${formData.profile.height} cm` : null}
+                icon={<Height />}
+                color="#764ba2"
+                subtitle="Estatura"
+              />
+            </Grid>
+            
+            <Grid item xs={12} sm={6} md={3}>
+              <StatCard
+                title="IMC"
+                value={calculateBMI()}
+                icon={<FitnessCenter />}
+                color="#26a69a"
+                subtitle={calculateBMI() ? getBMICategory(calculateBMI()).category : null}
+                progress={calculateBMI() ? getBMICategory(calculateBMI()).progress : null}
+              />
+            </Grid>
+            
+            <Grid item xs={12} sm={6} md={3}>
+              <StatCard
+                title="Edad"
+                value={formData.profile.age ? `${formData.profile.age} años` : null}
+                icon={<Person />}
+                color="#42a5f5"
+                subtitle="Años cumplidos"
+              />
+            </Grid>
+
+            {/* BMI Info Card */}
+            {calculateBMI() && (
+              <Grid item xs={12}>
+                <Slide direction="up" in={true} timeout={800}>
+                  <Paper 
+                    elevation={0}
+                    sx={{ 
+                      p: 3,
+                      background: 'rgba(255, 255, 255, 0.9)',
+                      backdropFilter: 'blur(20px)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      borderRadius: 4,
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                      <Timeline sx={{ mr: 2, color: 'primary.main', fontSize: 28 }} />
+                      <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                        Análisis del Índice de Masa Corporal
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap' }}>
+                      <Typography variant="h6" color="text.primary">
+                        Tu IMC es <strong style={{ fontSize: '1.3em', color: '#667eea' }}>{calculateBMI()}</strong>
+                      </Typography>
+                      <Chip
+                        label={getBMICategory(calculateBMI()).category}
+                        color={getBMICategory(calculateBMI()).color}
+                        variant="filled"
+                        sx={{ 
+                          fontWeight: 600, 
+                          fontSize: '0.9rem',
+                          px: 2,
+                          py: 1 
+                        }}
+                      />
+                    </Box>
+                  </Paper>
+                </Slide>
+              </Grid>
+            )}
+
+            {/* Profile Information */}
+            <Grid item xs={12}>
+              <Slide direction="up" in={true} timeout={1000}>
+                <Paper 
+                  elevation={0}
+                  sx={{ 
+                    p: 4,
+                    background: 'rgba(255, 255, 255, 0.9)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: 4,
+                  }}
+                >
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <AccountCircle sx={{ mr: 2, color: 'primary.main', fontSize: 32 }} />
+                      <Typography variant="h5" sx={{ fontWeight: 600, color: 'primary.main' }}>
+                        Información Personal
+                      </Typography>
+                    </Box>
+                    
+                    {!editing ? (
+                      <Button
+                        variant="contained"
+                        startIcon={<Edit />}
+                        onClick={() => setEditing(true)}
+                        sx={{
+                          borderRadius: 3,
+                          px: 3,
+                          py: 1,
+                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                          boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)',
+                          '&:hover': {
+                            transform: 'translateY(-2px)',
+                            boxShadow: '0 12px 35px rgba(102, 126, 234, 0.4)',
+                          }
+                        }}
+                      >
+                        Editar Perfil
+                      </Button>
+                    ) : (
+                      <Box sx={{ display: 'flex', gap: 2 }}>
+                        <Button
+                          variant="outlined"
+                          startIcon={<Cancel />}
+                          onClick={() => setEditing(false)}
+                          sx={{
+                            borderRadius: 3,
+                            px: 3,
+                            borderColor: 'error.main',
+                            color: 'error.main',
+                            '&:hover': {
+                              borderColor: 'error.dark',
+                              backgroundColor: 'error.main',
+                              color: 'white',
+                            }
+                          }}
+                        >
+                          Cancelar
+                        </Button>
+                        <Button
+                          variant="contained"
+                          startIcon={<Save />}
+                          onClick={handleSubmit}
+                          sx={{
+                            borderRadius: 3,
+                            px: 3,
+                            background: 'linear-gradient(135deg, #26a69a 0%, #00695c 100%)',
+                            '&:hover': {
+                              transform: 'translateY(-2px)',
+                              boxShadow: '0 8px 25px rgba(38, 166, 154, 0.4)',
+                            }
+                          }}
+                        >
+                          Guardar Cambios
+                        </Button>
+                      </Box>
+                    )}
+                  </Box>
+
+                  <Divider sx={{ mb: 4, background: 'linear-gradient(90deg, #667eea, transparent)' }} />
+
+                  <Box component="form" onSubmit={handleSubmit}>
+                    <Grid container spacing={3}>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          fullWidth
+                          label="Nombre"
+                          name="firstName"
+                          value={formData.profile.firstName}
+                          onChange={handleChange}
+                          disabled={!editing}
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 3,
+                              transition: 'all 0.3s ease',
+                              '&:hover': {
+                                boxShadow: editing ? '0 4px 20px rgba(102, 126, 234, 0.1)' : 'none',
+                              },
+                              '&.Mui-focused': {
+                                boxShadow: '0 4px 20px rgba(102, 126, 234, 0.2)',
+                              },
+                            },
+                          }}
+                        />
+                      </Grid>
+                      
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          fullWidth
+                          label="Apellido"
+                          name="lastName"
+                          value={formData.profile.lastName}
+                          onChange={handleChange}
+                          disabled={!editing}
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 3,
+                              transition: 'all 0.3s ease',
+                              '&:hover': {
+                                boxShadow: editing ? '0 4px 20px rgba(102, 126, 234, 0.1)' : 'none',
+                              },
+                              '&.Mui-focused': {
+                                boxShadow: '0 4px 20px rgba(102, 126, 234, 0.2)',
+                              },
+                            },
+                          }}
+                        />
+                      </Grid>
+                      
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          fullWidth
+                          label="Edad"
+                          name="age"
+                          type="number"
+                          value={formData.profile.age}
+                          onChange={handleChange}
+                          disabled={!editing}
+                          InputProps={{
+                            startAdornment: editing ? (
+                              <InputAdornment position="start">
+                                <Person color="action" />
+                              </InputAdornment>
+                            ) : null,
+                          }}
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 3,
+                              transition: 'all 0.3s ease',
+                              '&:hover': {
+                                boxShadow: editing ? '0 4px 20px rgba(102, 126, 234, 0.1)' : 'none',
+                              },
+                              '&.Mui-focused': {
+                                boxShadow: '0 4px 20px rgba(102, 126, 234, 0.2)',
+                              },
+                            },
+                          }}
+                        />
+                      </Grid>
+                      
+                      <Grid item xs={12} sm={6}>
+                        <FormControl 
+                          fullWidth
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 3,
+                              transition: 'all 0.3s ease',
+                              '&:hover': {
+                                boxShadow: editing ? '0 4px 20px rgba(102, 126, 234, 0.1)' : 'none',
+                              },
+                              '&.Mui-focused': {
+                                boxShadow: '0 4px 20px rgba(102, 126, 234, 0.2)',
+                              },
+                            },
+                          }}
+                        >
+                          <InputLabel>Género</InputLabel>
+                          <Select
+                            name="gender"
+                            value={formData.profile.gender}
+                            onChange={handleChange}
+                            disabled={!editing}
+                            startAdornment={editing ? (
+                              <InputAdornment position="start">
+                                <Wc color="action" />
+                              </InputAdornment>
+                            ) : null}
+                          >
+                            <MenuItem value="male">Masculino</MenuItem>
+                            <MenuItem value="female">Femenino</MenuItem>
+                            <MenuItem value="other">Otro</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                      
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          fullWidth
+                          label="Altura (cm)"
+                          name="height"
+                          type="number"
+                          value={formData.profile.height}
+                          onChange={handleChange}
+                          disabled={!editing}
+                          InputProps={{
+                            startAdornment: editing ? (
+                              <InputAdornment position="start">
+                                <Height color="action" />
+                              </InputAdornment>
+                            ) : null,
+                          }}
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 3,
+                              transition: 'all 0.3s ease',
+                              '&:hover': {
+                                boxShadow: editing ? '0 4px 20px rgba(102, 126, 234, 0.1)' : 'none',
+                              },
+                              '&.Mui-focused': {
+                                boxShadow: '0 4px 20px rgba(102, 126, 234, 0.2)',
+                              },
+                            },
+                          }}
+                        />
+                      </Grid>
+                      
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          fullWidth
+                          label="Peso (kg)"
+                          name="weight"
+                          type="number"
+                          value={formData.profile.weight}
+                          onChange={handleChange}
+                          disabled={!editing}
+                          InputProps={{
+                            startAdornment: editing ? (
+                              <InputAdornment position="start">
+                                <MonitorWeight color="action" />
+                              </InputAdornment>
+                            ) : null,
+                          }}
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 3,
+                              transition: 'all 0.3s ease',
+                              '&:hover': {
+                                boxShadow: editing ? '0 4px 20px rgba(102, 126, 234, 0.1)' : 'none',
+                              },
+                              '&.Mui-focused': {
+                                boxShadow: '0 4px 20px rgba(102, 126, 234, 0.2)',
+                              },
+                            },
+                          }}
+                        />
+                      </Grid>
+                      
+                      <Grid item xs={12}>
+                        <FormControl 
+                          fullWidth
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 3,
+                              transition: 'all 0.3s ease',
+                              '&:hover': {
+                                boxShadow: editing ? '0 4px 20px rgba(102, 126, 234, 0.1)' : 'none',
+                              },
+                              '&.Mui-focused': {
+                                boxShadow: '0 4px 20px rgba(102, 126, 234, 0.2)',
+                              },
+                            },
+                          }}
+                        >
+                          <InputLabel>Nivel de Fitness</InputLabel>
+                          <Select
+                            name="fitnessLevel"
+                            value={formData.profile.fitnessLevel}
+                            onChange={handleChange}
+                            disabled={!editing}
+                            startAdornment={editing ? (
+                              <InputAdornment position="start">
+                                <TrendingUp color="action" />
+                              </InputAdornment>
+                            ) : null}
+                          >
+                            <MenuItem value="beginner">🌱 Principiante</MenuItem>
+                            <MenuItem value="intermediate">💪 Intermedio</MenuItem>
+                            <MenuItem value="advanced">🏆 Avanzado</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </Paper>
+              </Slide>
+            </Grid>
+          </Grid>
+        </Fade>
+      </Container>
+    </Box>
   );
 };
 
