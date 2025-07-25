@@ -528,11 +528,16 @@ app.post('/exercises', authenticateToken, async (req, res) => {
 app.get('/routines', authenticateToken, async (req, res) => {
   try {
     const { page = 1, limit = 10, category, difficulty, isPublic } = req.query;
-    const filter = { userId: req.user.id };
+    const filter = { 
+      userId: req.user.id,
+      isActive: true 
+    };
 
     if (category) filter.category = category;
     if (difficulty) filter.difficulty = difficulty;
     if (isPublic !== undefined) filter.isPublic = isPublic === 'true';
+
+    logger.info(`Fetching routines for user: ${req.user.id}, filter:`, filter);
 
     const routines = await Routine.find(filter)
       .populate('exercises.exercise')
@@ -541,6 +546,8 @@ app.get('/routines', authenticateToken, async (req, res) => {
       .sort({ createdAt: -1 });
 
     const total = await Routine.countDocuments(filter);
+
+    logger.info(`Found ${routines.length} routines for user ${req.user.id}`);
 
     res.json({
       routines,

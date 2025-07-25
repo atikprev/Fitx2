@@ -119,6 +119,10 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
+    
+    // Clear any cached data when logging out
+    // This ensures the next user doesn't see previous user's data
+    window.location.reload();
   };
 
   const updateProfile = async (profileData) => {
