@@ -38,6 +38,9 @@ const Login = () => {
     setLoading(true);
 
     try {
+      // Clear any existing data before login
+      localStorage.clear();
+      
       const result = await login(formData.email, formData.password);
       
       if (result.success) {
