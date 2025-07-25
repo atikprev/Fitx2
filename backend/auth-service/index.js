@@ -478,18 +478,23 @@ app.get('/verify-token', async (req, res) => {
 // Update profile
 app.put('/profile', authenticateToken, async (req, res) => {
   try {
+    logger.info(`Profile update request for user: ${req.user.id}`);
+    
     const user = await User.findById(req.user.id);
 
     if (!user) {
+      logger.warn(`User not found for profile update: ${req.user.id}`);
       return res.status(404).json({ error: 'User not found' });
     }
 
     // Update profile fields
     if (req.body.profile) {
       user.profile = { ...user.profile, ...req.body.profile };
+      logger.info(`Updating profile for user ${req.user.id}:`, req.body.profile);
     }
 
     await user.save();
+    logger.info(`Profile updated successfully for user: ${req.user.id}`);
 
     res.json({
       message: 'Profile updated successfully',
@@ -499,6 +504,7 @@ app.put('/profile', authenticateToken, async (req, res) => {
         email: user.email,
         role: user.role,
         profile: user.profile,
+        createdAt: user.createdAt,
       },
     });
   } catch (error) {

@@ -136,26 +136,48 @@ const Profile = () => {
   );
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4, px: { xs: 2, sm: 3 } }}>
       <Grid container spacing={3}>
         {/* Header */}
         <Grid item xs={12}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+          <Paper 
+            sx={{ 
+              p: 4, 
+              mb: 3,
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white'
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Avatar
-              sx={{ width: 80, height: 80, mr: 3 }}
+              sx={{ 
+                width: 100, 
+                height: 100, 
+                mr: 4,
+                border: '4px solid rgba(255,255,255,0.3)',
+                fontSize: '2rem',
+                fontWeight: 700
+              }}
               src={user?.profile?.avatar}
             >
               {user?.username?.charAt(0).toUpperCase()}
             </Avatar>
             <Box>
-              <Typography variant="h4" gutterBottom>
+              <Typography variant="h3" gutterBottom sx={{ fontWeight: 700 }}>
                 {user?.username}
               </Typography>
-              <Typography variant="subtitle1" color="text.secondary">
+              <Typography variant="h6" sx={{ opacity: 0.9 }}>
                 {user?.email}
+              </Typography>
+              <Typography variant="body1" sx={{ opacity: 0.8, mt: 1 }}>
+                Miembro desde {new Date(user?.createdAt || Date.now()).toLocaleDateString('es-ES', {
+                  year: 'numeric',
+                  month: 'long'
+                })}
               </Typography>
             </Box>
           </Box>
+          </Paper>
         </Grid>
 
         {/* Messages */}

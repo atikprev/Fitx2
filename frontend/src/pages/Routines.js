@@ -67,16 +67,20 @@ const Routines = () => {
   });
 
   useEffect(() => {
-    fetchRoutines();
-    fetchExercises();
-  }, []);
+    if (user) {
+      fetchRoutines();
+      fetchExercises();
+    }
+  }, [user]);
 
   const fetchRoutines = async () => {
     try {
+      setLoading(true);
       const response = await axios.get('/api/routines');
       setRoutines(response.data.routines || []);
     } catch (error) {
       console.error('Error fetching routines:', error);
+      setRoutines([]);
     } finally {
       setLoading(false);
     }
