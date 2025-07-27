@@ -635,276 +635,427 @@ const Dashboard = () => {
           </Box>
           
           <DialogContent sx={{ pt: 3 }}>
-            {/* Step 1: Basic Information */}
-            {activeStep === 0 && (
-              <Box sx={{ minHeight: 400 }}>
-                <Typography variant="h6" sx={{ mb: 3, fontWeight: 600, color: 'primary.main' }}>
-                  Información Básica de la Rutina
-                </Typography>
-                
-                <Grid container spacing={3}>
-                  <Grid item xs={12}>
-                    <TextField
-                      fullWidth
-                      label='Nombre de la rutina'
-                      value={formData.name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
-                      required
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
-                        },
-                      }}
-                    />
-                  </Grid>
-                  
-                  <Grid item xs={12}>
-                    <TextField
-                      fullWidth
-                      label='Descripción'
-                      value={formData.description}
-                      onChange={(e) =>
-                        setFormData({ ...formData, description: e.target.value })
-                      }
-                      multiline
-                      rows={3}
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
-                        },
-                      }}
-                    />
-                  </Grid>
-                  
-                  <Grid item xs={12} sm={4}>
-                    <FormControl fullWidth>
-                      <InputLabel>Categoría</InputLabel>
-                      <Select
-                        value={formData.category}
-                        onChange={(e) =>
-                          setFormData({ ...formData, category: e.target.value })
-                        }
-                        sx={{ borderRadius: 2 }}
-                      >
-                        <MenuItem value='strength'>Fuerza</MenuItem>
-                        <MenuItem value='cardio'>Cardio</MenuItem>
-                        <MenuItem value='flexibility'>Flexibilidad</MenuItem>
-                        <MenuItem value='sports'>Deportes</MenuItem>
-                        <MenuItem value='rehabilitation'>Rehabilitación</MenuItem>
-                        <MenuItem value='weight_loss'>Pérdida de peso</MenuItem>
-                        <MenuItem value='muscle_gain'>Ganancia muscular</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                  
-                  <Grid item xs={12} sm={4}>
-                    <FormControl fullWidth>
-                      <InputLabel>Dificultad</InputLabel>
-                      <Select
-                        value={formData.difficulty}
-                        onChange={(e) =>
-                          setFormData({ ...formData, difficulty: e.target.value })
-                        }
-                        sx={{ borderRadius: 2 }}
-                      >
-                        <MenuItem value='beginner'>Principiante</MenuItem>
-                        <MenuItem value='intermediate'>Intermedio</MenuItem>
-                        <MenuItem value='advanced'>Avanzado</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                  
-                  <Grid item xs={12} sm={4}>
-                    <TextField
-                      fullWidth
-                      label='Duración estimada (min)'
-                      type='number'
-                      value={formData.estimatedDuration}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          estimatedDuration: parseInt(e.target.value),
-                        })
-                      }
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
-                        },
-                      }}
-                    />
-                  </Grid>
-                </Grid>
-              </Box>
-            )}
-            
-            {/* Step 2: Select Exercises */}
-            {activeStep === 1 && (
-              <Box sx={{ minHeight: 400 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main' }}>
-                    Seleccionar Ejercicios
-                  </Typography>
-                  <Button
-                    variant="outlined"
-                    startIcon={<Add />}
-                    onClick={() => setOpenNewExerciseDialog(true)}
-                    size="small"
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label='Nombre de la rutina'
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  required
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label='Descripción'
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
+                  multiline
+                  rows={3}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Categoría</InputLabel>
+                  <Select
+                    value={formData.category}
+                    onChange={(e) =>
+                      setFormData({ ...formData, category: e.target.value })
+                    }
                   >
-                    Nuevo Ejercicio
-                  </Button>
-                </Box>
-                
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                  Selecciona los ejercicios que quieres incluir en tu rutina. Puedes elegir múltiples ejercicios.
-                </Typography>
-                
-                {loadingExercises ? (
-                  <Typography>Cargando ejercicios...</Typography>
-                ) : (
-                  <Paper sx={{ maxHeight: 400, overflow: 'auto', border: '1px solid #e0e0e0' }}>
-                    <List>
-                      {availableExercises.map((exercise) => (
-                        <ListItem
-                          key={exercise._id}
-                          button
-                          onClick={() => handleExerciseToggle(exercise._id)}
-                          sx={{
-                            '&:hover': {
-                              backgroundColor: 'primary.50',
-                            },
-                            backgroundColor: selectedExercises.includes(exercise._id) 
-                              ? 'primary.50' 
-                              : 'transparent',
-                          }}
-                        >
-                          <Checkbox
-                            checked={selectedExercises.includes(exercise._id)}
-                            onChange={() => handleExerciseToggle(exercise._id)}
-                            sx={{ mr: 2 }}
-                          />
-                          <ListItemText
-                            primary={exercise.name}
-                            secondary={
-                              <Box>
-                                <Typography variant="body2" color="text.secondary">
-                                  {exercise.description || 'Sin descripción'}
-                                </Typography>
-                                <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
-                                  {exercise.muscleGroups?.map((group) => (
-                                    <Chip
-                                      key={group}
-                                      label={group}
-                                      size="small"
-                                      variant="outlined"
-                                      sx={{ fontSize: '0.7rem' }}
-                                    />
-                                  ))}
-                                </Box>
-                              </Box>
-                            }
-                          />
-                        </ListItem>
-                      ))}
-                    </List>
-                  </Paper>
-                )}
-                
-                {selectedExercises.length > 0 && (
-                  <Box sx={{ mt: 3 }}>
-                    <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                      Ejercicios seleccionados: {selectedExercises.length}
-                    </Typography>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                      {selectedExercises.map((exerciseId) => {
-                        const exercise = availableExercises.find(ex => ex._id === exerciseId);
-                        return (
-                          <Chip
-                            key={exerciseId}
-                            label={exercise?.name || 'Ejercicio'}
-                            onDelete={() => handleExerciseToggle(exerciseId)}
-                            color="primary"
-                            variant="filled"
-                          />
-                        );
-                      })}
-                    </Box>
-                  </Box>
-                )}
-              </Box>
-            )}
-            
-            {/* Step 3: Confirm */}
-            {activeStep === 2 && (
-              <Box sx={{ minHeight: 400 }}>
-                <Typography variant="h6" sx={{ mb: 3, fontWeight: 600, color: 'primary.main' }}>
-                  Confirmar Rutina
-                </Typography>
-                
-                <Paper sx={{ p: 3, mb: 3, backgroundColor: 'grey.50' }}>
-                  <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                    {formData.name}
+                    <MenuItem value='strength'>Fuerza</MenuItem>
+                    <MenuItem value='cardio'>Cardio</MenuItem>
+                    <MenuItem value='flexibility'>Flexibilidad</MenuItem>
+                    <MenuItem value='sports'>Deportes</MenuItem>
+                    <MenuItem value='rehabilitation'>Rehabilitación</MenuItem>
+                    <MenuItem value='weight_loss'>Pérdida de peso</MenuItem>
+                    <MenuItem value='muscle_gain'>Ganancia muscular</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Dificultad</InputLabel>
+                  <Select
+                    value={formData.difficulty}
+                    onChange={(e) =>
+                      setFormData({ ...formData, difficulty: e.target.value })
+                    }
+                  >
+                    <MenuItem value='beginner'>Principiante</MenuItem>
+                    <MenuItem value='intermediate'>Intermedio</MenuItem>
+                    <MenuItem value='advanced'>Avanzado</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label='Duración estimada (min)'
+                  type='number'
+                  value={formData.estimatedDuration}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      estimatedDuration: parseInt(e.target.value),
+                    })
+                  }
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel id='exercises-label'>Ejercicios</InputLabel>
+                  <Select
+                    labelId='exercises-label'
+                    multiple
+                    value={formData.exercises.map((ex) =>
+                      typeof ex === 'string' ? ex : ex.exercise
+                    )}
+                    onChange={async (e) => {
+                      const selected = e.target.value;
+                      if (selected.includes('nuevo')) {
+                        setOpenNewExerciseDialog(true);
+                        setFormData((prev) => ({
+                          ...prev,
+                          exercises: prev.exercises.filter(
+                            (ex) => ex !== 'nuevo'
+                          ),
+                        }));
+                        return;
+                      }
+                      setFormData((prev) => ({
+                        ...prev,
+                        exercises: selected.map((exId, idx) => {
+                          const found = prev.exercises.find((ex) =>
+                            typeof ex === 'string'
+                              ? ex === exId
+                              : ex.exercise === exId
+                          );
+                          return found
+                            ? found
+                            : {
+                                exercise: exId,
+                                sets: [
+                                  {
+                                    reps: '',
+                                    weight: '',
+                                    duration: '',
+                                    rest: '',
+                                  },
+                                ],
+                              };
+                        }),
+                      }));
+                    }}
+                    renderValue={(selected) =>
+                      availableExercises
+                        .filter((ex) => selected.includes(ex._id))
+                        .map((ex) => ex.name)
+                        .concat(
+                          selected.includes('nuevo') ? ['(Nuevo ejercicio)'] : []
+                        )
+                        .join(', ')
+                    }
+                    disabled={loadingExercises}
+                  >
+                    {loadingExercises ? (
+                      <MenuItem disabled>Cargando ejercicios...</MenuItem>
+                    ) : (
+                      [
+                        ...availableExercises.map((ex) => (
+                          <MenuItem key={ex._id} value={ex._id}>
+                            {ex.name}
+                          </MenuItem>
+                        )),
+                        <MenuItem key='nuevo' value='nuevo'>
+                          <Button
+                            variant='outlined'
+                            color='primary'
+                            fullWidth
+                          >
+                            + Crear nuevo ejercicio
+                          </Button>
+                        </MenuItem>,
+                      ]
+                    )}
+                  </Select>
+                </FormControl>
+              </Grid>
+              {formData.exercises.length > 0 && (
+                <Grid item xs={12}>
+                  <Typography variant='h6' sx={{ mt: 2, mb: 2, fontWeight: 600 }}>
+                    Configuración de Sets
                   </Typography>
-                  
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    {formData.description || 'Sin descripción'}
-                  </Typography>
-                  
-                  <Grid container spacing={2} sx={{ mb: 2 }}>
-                    <Grid item xs={6} sm={3}>
-                      <Typography variant="caption" color="text.secondary">
-                        Categoría
-                      </Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        {formData.category}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={6} sm={3}>
-                      <Typography variant="caption" color="text.secondary">
-                        Dificultad
-                      </Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        {formData.difficulty}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={6} sm={3}>
-                      <Typography variant="caption" color="text.secondary">
-                        Duración
-                      </Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        {formData.estimatedDuration} min
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={6} sm={3}>
-                      <Typography variant="caption" color="text.secondary">
-                        Ejercicios
-                      </Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        {selectedExercises.length}
-                      </Typography>
-                    </Grid>
-                  </Grid>
-                  
-                  {formData.isPublic && (
-                    <Chip label="Rutina Pública" color="info" size="small" />
-                  )}
-                </Paper>
-                
-                <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
-                  Ejercicios incluidos:
-                </Typography>
-                
-                <List sx={{ border: '1px solid #e0e0e0', borderRadius: 2, maxHeight: 200, overflow: 'auto' }}>
-                  {selectedExercises.map((exerciseId, index) => {
-                    const exercise = availableExercises.find(ex => ex._id === exerciseId);
+                  <Divider sx={{ mb: 2 }} />
+                  {formData.exercises.map((ex, idx) => {
+                    const exId = typeof ex === 'string' ? ex : ex.exercise;
+                    const exObj = availableExercises.find((e) => e._id === exId);
+                    const sets =
+                      (typeof ex === 'string'
+                        ? [{ reps: '', weight: '', duration: '', rest: '' }]
+                        : ex.sets) || [];
                     return (
-                      <ListItem key={exerciseId}>
-                        <ListItemText
-                          primary={`${index + 1}. ${exercise?.name || 'Ejercicio'}`}
-                          secondary={exercise?.description || 'Sin descripción'}
-                        />
-                      </ListItem>
+                      <Paper
+                        key={exId}
+                        sx={{
+                          mb: 3,
+                          p: 3,
+                          border: '1px solid #e0e0e0',
+                        }}
+                      >
+                        <Box
+                          sx={{ display: 'flex', alignItems: 'center', mb: 2 }}
+                        >
+                          <Typography
+                            variant='subtitle1'
+                            sx={{ flexGrow: 1, fontWeight: 600 }}
+                          >
+                            {exObj ? exObj.name : 'Ejercicio'}
+                          </Typography>
+                          <Button
+                            size='small'
+                            color='error'
+                            variant='outlined'
+                            onClick={() => {
+                              setFormData((prev) => ({
+                                ...prev,
+                                exercises: prev.exercises.filter(
+                                  (_, i) => i !== idx
+                                ),
+                              }));
+                            }}
+                          >
+                            Eliminar ejercicio
+                          </Button>
+                        </Box>
+                        <Stack spacing={2}>
+                          {sets.map((set, sidx) => (
+                            <Box
+                              key={sidx}
+                              sx={{
+                                display: 'flex',
+                                gap: 2,
+                                alignItems: 'center',
+                                p: 2,
+                                backgroundColor: 'grey.50',
+                                borderRadius: 1,
+                              }}
+                            >
+                              <Typography variant="body2" sx={{ minWidth: 60 }}>
+                                Set {sidx + 1}:
+                              </Typography>
+                              <TextField
+                                label='Reps'
+                                type='number'
+                                size='small'
+                                value={set.reps}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setFormData((prev) => {
+                                    const newExercises = [...prev.exercises];
+                                    if (typeof newExercises[idx] === 'string')
+                                      newExercises[idx] = {
+                                        exercise: exId,
+                                        sets: [
+                                          {
+                                            reps: '',
+                                            weight: '',
+                                            duration: '',
+                                            rest: '',
+                                          },
+                                        ],
+                                      };
+                                    newExercises[idx].sets[sidx].reps = val;
+                                    return { ...prev, exercises: newExercises };
+                                  });
+                                }}
+                                sx={{ width: 80 }}
+                              />
+                              <TextField
+                                label='Peso (kg)'
+                                type='number'
+                                size='small'
+                                value={set.weight}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setFormData((prev) => {
+                                    const newExercises = [...prev.exercises];
+                                    if (typeof newExercises[idx] === 'string')
+                                      newExercises[idx] = {
+                                        exercise: exId,
+                                        sets: [
+                                          {
+                                            reps: '',
+                                            weight: '',
+                                            duration: '',
+                                            rest: '',
+                                          },
+                                        ],
+                                      };
+                                    newExercises[idx].sets[sidx].weight = val;
+                                    return { ...prev, exercises: newExercises };
+                                  });
+                                }}
+                                sx={{ width: 100 }}
+                              />
+                              <TextField
+                                label='Duración (seg)'
+                                type='number'
+                                size='small'
+                                value={set.duration}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setFormData((prev) => {
+                                    const newExercises = [...prev.exercises];
+                                    if (typeof newExercises[idx] === 'string')
+                                      newExercises[idx] = {
+                                        exercise: exId,
+                                        sets: [
+                                          {
+                                            reps: '',
+                                            weight: '',
+                                            duration: '',
+                                            rest: '',
+                                          },
+                                        ],
+                                      };
+                                    newExercises[idx].sets[sidx].duration = val;
+                                    return { ...prev, exercises: newExercises };
+                                  });
+                                }}
+                                sx={{ width: 120 }}
+                              />
+                              <TextField
+                                label='Descanso (seg)'
+                                type='number'
+                                size='small'
+                                value={set.rest}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setFormData((prev) => {
+                                    const newExercises = [...prev.exercises];
+                                    if (typeof newExercises[idx] === 'string')
+                                      newExercises[idx] = {
+                                        exercise: exId,
+                                        sets: [
+                                          {
+                                            reps: '',
+                                            weight: '',
+                                            duration: '',
+                                            rest: '',
+                                          },
+                                        ],
+                                      };
+                                    newExercises[idx].sets[sidx].rest = val;
+                                    return { ...prev, exercises: newExercises };
+                                  });
+                                }}
+                                sx={{ width: 120 }}
+                              />
+                              <Button
+                                size='small'
+                                color='error'
+                                onClick={() => {
+                                  setFormData((prev) => {
+                                    const newExercises = [...prev.exercises];
+                                    if (typeof newExercises[idx] === 'string')
+                                      newExercises[idx] = {
+                                        exercise: exId,
+                                        sets: [
+                                          {
+                                            reps: '',
+                                            weight: '',
+                                            duration: '',
+                                            rest: '',
+                                          },
+                                        ],
+                                      };
+                                    newExercises[idx].sets.splice(sidx, 1);
+                                    if (newExercises[idx].sets.length === 0)
+                                      newExercises[idx].sets.push({
+                                        reps: '',
+                                        weight: '',
+                                        duration: '',
+                                        rest: '',
+                                      });
+                                    return { ...prev, exercises: newExercises };
+                                  });
+                                }}
+                              >
+                                Eliminar
+                              </Button>
+                              <Button
+                                size='small'
+                                color='info'
+                                onClick={() => {
+                                  setFormData((prev) => {
+                                    const newExercises = [...prev.exercises];
+                                    if (typeof newExercises[idx] === 'string')
+                                      newExercises[idx] = {
+                                        exercise: exId,
+                                        sets: [
+                                          {
+                                            reps: '',
+                                            weight: '',
+                                            duration: '',
+                                            rest: '',
+                                          },
+                                        ],
+                                      };
+                                    const setToCopy = {
+                                      ...newExercises[idx].sets[sidx],
+                                    };
+                                    newExercises[idx].sets.splice(
+                                      sidx + 1,
+                                      0,
+                                      setToCopy
+                                    );
+                                    return { ...prev, exercises: newExercises };
+                                  });
+                                }}
+                              >
+                                Duplicar
+                              </Button>
+                            </Box>
+                          ))}
+                          <Button
+                            size='small'
+                            variant='outlined'
+                            onClick={() => {
+                              setFormData((prev) => {
+                                const newExercises = [...prev.exercises];
+                                if (typeof newExercises[idx] === 'string')
+                                  newExercises[idx] = {
+                                    exercise: exId,
+                                    sets: [
+                                      {
+                                        reps: '',
+                                        weight: '',
+                                        duration: '',
+                                        rest: '',
+                                      },
+                                    ],
+                                  };
+                                newExercises[idx].sets.push({
+                                  reps: '',
+                                  weight: '',
+                                  duration: '',
+                                  rest: '',
+                                });
+                                return { ...prev, exercises: newExercises };
+                              });
+                            }}
+                            sx={{ alignSelf: 'flex-start' }}
+                          >
+                            + Agregar set
+                          </Button>
+                        </Stack>
+                      </Paper>
                     );
                   })}
                 </List>
