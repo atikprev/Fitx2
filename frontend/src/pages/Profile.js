@@ -412,7 +412,7 @@ const Profile = () => {
                 value={formData.profile.age ? `${formData.profile.age} años` : null}
                 icon={<Person />}
                 color="#42a5f5"
-                subtitle="Años cumplidos"
+                subtitle="Años"
               />
             </Grid>
 

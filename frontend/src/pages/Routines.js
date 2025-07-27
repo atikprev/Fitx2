@@ -178,10 +178,10 @@ const Routines = () => {
             duration: set.duration !== '' && set.duration !== undefined ? Number(set.duration) : undefined,
             rest: set.rest !== '' && set.rest !== undefined ? Number(set.rest) : undefined,
           }))
-          .filter((set) => 
-            set.reps !== undefined && 
-            set.weight !== undefined && 
-            set.duration !== undefined && 
+          .filter((set) =>
+            set.reps !== undefined &&
+            set.weight !== undefined &&
+            set.duration !== undefined &&
             set.rest !== undefined
           );
         if (sets.length === 0) return null;
@@ -194,7 +194,7 @@ const Routines = () => {
       .filter(Boolean);
 
     const dataToSend = { ...formData, exercises: normalizedExercises };
-    
+
     try {
       if (selectedRoutine) {
         await axios.put(`/api/routines/${selectedRoutine._id}`, dataToSend);
@@ -294,28 +294,28 @@ const Routines = () => {
 
   const filteredRoutines = routines.filter(routine => {
     const matchesSearch = routine.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         routine.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      routine.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = !filterCategory || routine.category === filterCategory;
     const matchesDifficulty = !filterDifficulty || routine.difficulty === filterDifficulty;
-    
+
     return matchesSearch && matchesCategory && matchesDifficulty;
   });
 
   const filteredPublicRoutines = publicRoutines.filter(routine => {
     const matchesSearch = routine.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         routine.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      routine.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = !filterCategory || routine.category === filterCategory;
     const matchesDifficulty = !filterDifficulty || routine.difficulty === filterDifficulty;
-    
+
     return matchesSearch && matchesCategory && matchesDifficulty;
   });
 
   const RoutineCard = ({ routine, isPublic = false }) => {
     const isExpanded = expandedCards[routine._id];
-    
+
     return (
       <Card
-        sx={{ 
+        sx={{
           height: 'fit-content',
           transition: 'all 0.2s ease-in-out',
           '&:hover': {
@@ -330,8 +330,8 @@ const Routines = () => {
             <Typography
               variant='h6'
               component='div'
-              sx={{ 
-                fontWeight: 600, 
+              sx={{
+                fontWeight: 600,
                 color: 'text.primary',
                 flex: 1,
                 mr: 2,
@@ -354,13 +354,13 @@ const Routines = () => {
               />
             </Stack>
           </Box>
-          
+
           {/* Description */}
           <Typography
             variant='body2'
             color='text.secondary'
-            sx={{ 
-              mb: 2, 
+            sx={{
+              mb: 2,
               lineHeight: 1.5,
               display: '-webkit-box',
               WebkitLineClamp: isExpanded ? 'none' : 2,
@@ -370,7 +370,7 @@ const Routines = () => {
           >
             {routine.description || 'Sin descripción disponible'}
           </Typography>
-          
+
           {/* Stats */}
           <Box sx={{ display: 'flex', gap: 3, mb: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -425,10 +425,10 @@ const Routines = () => {
             </Typography>
             <List dense sx={{ py: 0 }}>
               {(routine.exercises || []).slice(0, 5).map((ex, idx) => {
-                const exObj = ex.exercise && typeof ex.exercise === 'object' 
-                  ? ex.exercise 
+                const exObj = ex.exercise && typeof ex.exercise === 'object'
+                  ? ex.exercise
                   : availableExercises.find(e => e._id === (ex.exercise?._id || ex.exercise));
-                
+
                 return (
                   <ListItem key={idx} sx={{ px: 0, py: 0.5 }}>
                     <ListItemIcon sx={{ minWidth: 32 }}>
@@ -447,8 +447,8 @@ const Routines = () => {
                 <ListItem sx={{ px: 0, py: 0.5 }}>
                   <ListItemText
                     primary={`... y ${(routine.exercises?.length || 0) - 5} ejercicios más`}
-                    primaryTypographyProps={{ 
-                      variant: 'caption', 
+                    primaryTypographyProps={{
+                      variant: 'caption',
                       color: 'text.secondary',
                       fontStyle: 'italic'
                     }}
@@ -458,9 +458,9 @@ const Routines = () => {
             </List>
           </Collapse>
         </CardContent>
-        
+
         <Divider />
-        
+
         <CardActions sx={{ px: 2, py: 1.5, justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', gap: 1 }}>
             <Button
@@ -475,7 +475,7 @@ const Routines = () => {
             >
               Ver Detalles
             </Button>
-            
+
             <Button
               size='small'
               startIcon={isExpanded ? <ExpandLess /> : <ExpandMore />}
@@ -486,7 +486,7 @@ const Routines = () => {
               {isExpanded ? 'Menos' : 'Más'}
             </Button>
           </Box>
-          
+
           <Box sx={{ display: 'flex', gap: 0.5 }}>
             {isPublic ? (
               <IconButton
@@ -550,8 +550,8 @@ const Routines = () => {
             <Box>
               <Typography
                 variant='h3'
-                sx={{ 
-                  fontWeight: 700, 
+                sx={{
+                  fontWeight: 700,
                   color: 'primary.main',
                   mb: 1,
                 }}
@@ -575,7 +575,7 @@ const Routines = () => {
 
           {/* Search and Filters */}
           <Divider sx={{ mb: 3 }} />
-          
+
           <Grid container spacing={2} alignItems="center">
             <Grid item xs={12} md={4}>
               <TextField
@@ -597,13 +597,17 @@ const Routines = () => {
                 }}
               />
             </Grid>
-            
+
             <Grid item xs={12} sm={6} md={3}>
               <FormControl fullWidth>
                 <InputLabel>Categoría</InputLabel>
                 <Select
                   value={filterCategory}
                   onChange={(e) => setFilterCategory(e.target.value)}
+                  displayEmpty
+                  renderValue={
+                    filterCategory !== "" ? undefined : () => "               "
+                  }
                   sx={{ borderRadius: 2 }}
                 >
                   <MenuItem value="">Todas</MenuItem>
@@ -617,13 +621,17 @@ const Routines = () => {
                 </Select>
               </FormControl>
             </Grid>
-            
+
             <Grid item xs={12} sm={6} md={3}>
               <FormControl fullWidth>
                 <InputLabel>Dificultad</InputLabel>
                 <Select
                   value={filterDifficulty}
                   onChange={(e) => setFilterDifficulty(e.target.value)}
+                  displayEmpty
+                  renderValue={
+                    filterDifficulty !== "" ? undefined : () => "               "
+                  }
                   sx={{ borderRadius: 2 }}
                 >
                   <MenuItem value="">Todas</MenuItem>
@@ -664,7 +672,7 @@ const Routines = () => {
           <Tabs
             value={tabValue}
             onChange={(e, newValue) => setTabValue(newValue)}
-            sx={{ 
+            sx={{
               px: 2,
               '& .MuiTab-root': {
                 textTransform: 'none',
@@ -673,15 +681,11 @@ const Routines = () => {
               },
             }}
           >
-            <Tab 
-              label={`Mis Rutinas (${filteredRoutines.length})`} 
-
-            />
-            <Tab 
-              label={`Rutinas Públicas (${filteredPublicRoutines.length})`} 
+            <Tab
+              label={`Mis Rutinas (${filteredRoutines.length})`}
             />
           </Tabs>
-          
+
           <Divider />
 
           {/* Tab Content */}
@@ -711,8 +715,8 @@ const Routines = () => {
                       sx={{ fontSize: 80, color: 'text.secondary', mb: 3 }}
                     />
                     <Typography variant='h5' gutterBottom sx={{ fontWeight: 600 }}>
-                      {searchTerm || filterCategory || filterDifficulty 
-                        ? 'No se encontraron rutinas' 
+                      {searchTerm || filterCategory || filterDifficulty
+                        ? 'No se encontraron rutinas'
                         : 'No tienes rutinas creadas'
                       }
                     </Typography>
@@ -839,7 +843,7 @@ const Routines = () => {
               <Grid item xs={12} sm={6}>
                 <FormControl
                   sx={{ width: 130, height: 56 }}
-                 >
+                >
 
                   <InputLabel>Categoría</InputLabel>
                   <Select
@@ -937,7 +941,7 @@ const Routines = () => {
                   const exObj = ex.exercise && typeof ex.exercise === 'object'
                     ? ex.exercise
                     : availableExercises.find(e => e._id === (ex.exercise?._id || ex.exercise));
-                  
+
                   return (
                     <Paper
                       key={idx}
@@ -953,7 +957,7 @@ const Routines = () => {
                           {exObj ? exObj.name : `Ejercicio ${idx + 1}`}
                         </Typography>
                       </Box>
-                      
+
                       {exObj && exObj.description && (
                         <Typography
                           variant='body2'
@@ -963,7 +967,7 @@ const Routines = () => {
                           {exObj.description}
                         </Typography>
                       )}
-                      
+
                       {ex.sets && ex.sets.length > 0 && (
                         <>
                           <Divider sx={{ mb: 2 }} />
@@ -1018,7 +1022,7 @@ const Routines = () => {
           </DialogContent>
           <Divider />
           <DialogActions sx={{ p: 3 }}>
-            <Button 
+            <Button
               onClick={() => setOpenExercisesDialog(false)}
               variant="contained"
               size="large"
