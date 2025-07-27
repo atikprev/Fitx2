@@ -1,31 +1,29 @@
-import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import {
   AppBar,
   Toolbar,
   Typography,
   Button,
-  IconButton,
   Box,
-  Avatar,
+  IconButton,
   Menu,
   MenuItem,
+  Avatar,
   Divider,
   Badge,
-  Tooltip,
-  useTheme,
-  alpha,
+  Chip,
+  Stack,
 } from '@mui/material';
 import {
-  Menu as MenuIcon,
   Dashboard,
   FitnessCenter,
   Chat,
   Person,
   Logout,
   Settings,
-  NotificationsNone,
-  Home,
+  Notifications,
+  Menu as MenuIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { useSocket } from '../contexts/SocketContext';
@@ -33,28 +31,62 @@ import { useSocket } from '../contexts/SocketContext';
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const theme = useTheme();
   const { user, logout } = useAuth();
-  const { connected, onlineUsers } = useSocket();
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const { onlineUsers } = useSocket();
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [mobileMenuAnchor, setMobileMenuAnchor] = useState(null);
 
-  const handleMenu = (event) => {
+  const handleUserMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleClose = () => {
+  const handleUserMenuClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleMobileMenuOpen = (event) => {
+    setMobileMenuAnchor(event.currentTarget);
+  };
+
+  const handleMobileMenuClose = () => {
+    setMobileMenuAnchor(null);
   };
 
   const handleLogout = () => {
     logout();
-    handleClose();
+    handleUserMenuClose();
     navigate('/login');
   };
 
-  const handleNavigate = (path) => {
-    navigate(path);
-    handleClose();
+  const navigationItems = [
+    {
+      label: 'Dashboard',
+      path: '/',
+      icon: <Dashboard />,
+    },
+    {
+      label: 'Rutinas',
+      path: '/routines',
+      icon: <FitnessCenter />,
+    },
+    {
+      label: 'Chat',
+      path: '/chat',
+      icon: <Chat />,
+      badge: onlineUsers.length > 0 ? onlineUsers.length : null,
+    },
+    {
+      label: 'Perfil',
+      path: '/profile',
+      icon: <Person />,
+    },
+  ];
+
+  const isActive = (path) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
   };
 
   // Don't show navbar on login/register pages
@@ -62,237 +94,249 @@ const Navbar = () => {
     return null;
   }
 
-  // Don't show navbar if user is not logged in
-  if (!user) {
-    return null;
-  }
-
-  const isActive = (path) => location.pathname === path;
-
-  const navItems = [
-    { path: '/', label: 'Dashboard', icon: <Dashboard />, key: 'dashboard' },
-    { path: '/routines', label: 'Rutinas', icon: <FitnessCenter />, key: 'routines' },
-    { path: '/chat', label: 'Chat', icon: <Chat />, key: 'chat', badge: connected ? onlineUsers.length : 0 },
-  ];
-
   return (
-    <AppBar 
-      position="static" 
-      sx={{ 
-        mb: 2,
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+    <AppBar
+      position="sticky"
+      elevation={0}
+      sx={{
+        backgroundColor: 'white',
+        borderBottom: '1px solid #e0e0e0',
+        color: 'text.primary',
       }}
     >
-      <Toolbar sx={{ minHeight: 70 }}>
-        <IconButton
-          size="large"
-          edge="start"
-          color="inherit"
-          aria-label="menu"
-          sx={{ 
-            mr: 2,
-            '&:hover': {
-              backgroundColor: alpha(theme.palette.common.white, 0.1),
-            }
+      <Toolbar sx={{ px: { xs: 2, md: 4 }, py: 1 }}>
+        {/* Logo Section */}
+        <Box
+          component={Link}
+          to="/"
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            textDecoration: 'none',
+            color: 'inherit',
+            mr: 4,
           }}
         >
-          <MenuIcon />
-        </IconButton>
-        
-        <Box sx={{ display: 'flex', alignItems: 'center', mr: 4 }}>
-          <FitnessCenter sx={{ mr: 1, fontSize: 28 }} />
-          <Typography 
-            variant="h5" 
-            component="div" 
-            sx={{ 
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 40,
+              height: 40,
+              borderRadius: '50%',
+              backgroundColor: 'primary.main',
+              mr: 2,
+            }}
+          >
+            <FitnessCenter sx={{ color: 'white', fontSize: 24 }} />
+          </Box>
+          <Typography
+            variant="h6"
+            sx={{
               fontWeight: 700,
-              background: 'linear-gradient(45deg, #ffffff, #f0f0f0)',
-              backgroundClip: 'text',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
+              color: 'primary.main',
+              display: { xs: 'none', sm: 'block' },
             }}
           >
             FitManager360
           </Typography>
         </Box>
 
-        <Box sx={{ flexGrow: 1, display: 'flex', gap: 1 }}>
-          {navItems.map((item) => (
-            <Tooltip key={item.key} title={item.label} arrow>
-              <Button
-                color="inherit"
-                startIcon={item.icon}
-                onClick={() => handleNavigate(item.path)}
-                sx={{
-                  px: 3,
-                  py: 1,
-                  borderRadius: 2,
-                  fontWeight: 600,
-                  backgroundColor: isActive(item.path) 
-                    ? alpha(theme.palette.common.white, 0.2)
-                    : 'transparent',
-                  border: isActive(item.path) 
-                    ? `2px solid ${alpha(theme.palette.common.white, 0.3)}`
-                    : '2px solid transparent',
-                  transition: 'all 0.2s ease-in-out',
-                  '&:hover': {
-                    backgroundColor: alpha(theme.palette.common.white, 0.15),
-                    transform: 'translateY(-2px)',
-                  },
-                  display: { xs: 'none', sm: 'flex' }
-                }}
-              >
-                {item.badge !== undefined ? (
-                  <Badge
-                    badgeContent={item.badge}
-                    color="error"
-                    max={99}
-                    sx={{
-                      '& .MuiBadge-badge': {
-                        backgroundColor: '#ff4444',
-                        color: 'white',
-                        fontWeight: 600,
-                      }
-                    }}
-                  >
-                    {item.label}
+        {/* Desktop Navigation */}
+        <Box
+          sx={{
+            display: { xs: 'none', md: 'flex' },
+            alignItems: 'center',
+            gap: 1,
+            flexGrow: 1,
+          }}
+        >
+          {navigationItems.map((item) => (
+            <Button
+              key={item.path}
+              component={Link}
+              to={item.path}
+              startIcon={
+                item.badge ? (
+                  <Badge badgeContent={item.badge} color="secondary">
+                    {item.icon}
                   </Badge>
                 ) : (
-                  item.label
-                )}
-              </Button>
-            </Tooltip>
+                  item.icon
+                )
+              }
+              sx={{
+                px: 3,
+                py: 1,
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 500,
+                color: isActive(item.path) ? 'primary.main' : 'text.secondary',
+                backgroundColor: isActive(item.path) ? 'primary.50' : 'transparent',
+                border: isActive(item.path) ? '1px solid' : '1px solid transparent',
+                borderColor: isActive(item.path) ? 'primary.200' : 'transparent',
+                '&:hover': {
+                  backgroundColor: 'primary.50',
+                  color: 'primary.main',
+                },
+              }}
+            >
+              {item.label}
+            </Button>
           ))}
         </Box>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Tooltip title="Notificaciones" arrow>
-            <IconButton 
-              color="inherit" 
-              sx={{ 
-                '&:hover': {
-                  backgroundColor: alpha(theme.palette.common.white, 0.1),
-                }
-              }}
-            >
+        {/* Mobile Menu Button */}
+        <IconButton
+          sx={{ display: { xs: 'block', md: 'none' }, ml: 'auto', mr: 2 }}
+          onClick={handleMobileMenuOpen}
+        >
+          <MenuIcon />
+        </IconButton>
+
+        {/* User Section */}
+        {user && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {/* Online Status */}
+            <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 1 }}>
+              <Chip
+                size="small"
+                label={`${onlineUsers.length} en línea`}
+                color="success"
+                variant="outlined"
+                sx={{ fontSize: '0.75rem' }}
+              />
+            </Box>
+
+            {/* Notifications */}
+            <IconButton size="small" sx={{ color: 'text.secondary' }}>
               <Badge badgeContent={0} color="error">
-                <NotificationsNone />
+                <Notifications />
               </Badge>
             </IconButton>
-          </Tooltip>
 
-          <Tooltip title="Perfil de usuario" arrow>
-            <IconButton
-              size="large"
-              onClick={handleMenu}
-              color="inherit"
-              sx={{
-                ml: 1,
-                '&:hover': {
-                  backgroundColor: alpha(theme.palette.common.white, 0.1),
-                }
-              }}
-            >
-              <Avatar
-                sx={{ 
-                  width: 40, 
-                  height: 40,
-                  border: '2px solid rgba(255,255,255,0.3)',
-                  transition: 'all 0.2s ease-in-out',
-                  '&:hover': {
-                    border: '2px solid rgba(255,255,255,0.6)',
-                    transform: 'scale(1.05)',
-                  }
-                }}
-                src={user?.profile?.avatar}
-              >
-                {user?.username?.charAt(0).toUpperCase()}
-              </Avatar>
-            </IconButton>
-          </Tooltip>
-          
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleClose}
-            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-            PaperProps={{
-              sx: {
-                mt: 1,
-                minWidth: 200,
-                borderRadius: 2,
-                boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                '& .MuiMenuItem-root': {
-                  px: 2,
-                  py: 1.5,
-                  borderRadius: 1,
-                  mx: 1,
-                  my: 0.5,
-                  '&:hover': {
-                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
-                  }
-                }
-              }
+            {/* User Avatar and Menu */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ display: { xs: 'none', sm: 'block' }, textAlign: 'right' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                  {user.username}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {user.role === 'admin' ? 'Administrador' : 'Usuario'}
+                </Typography>
+              </Box>
+              
+              <IconButton onClick={handleUserMenuOpen} sx={{ p: 0.5 }}>
+                <Avatar
+                  sx={{
+                    width: 36,
+                    height: 36,
+                    backgroundColor: 'primary.main',
+                    fontSize: '1rem',
+                    fontWeight: 600,
+                  }}
+                >
+                  {user.username?.charAt(0).toUpperCase()}
+                </Avatar>
+              </IconButton>
+            </Box>
+          </Box>
+        )}
+
+        {/* User Menu */}
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleUserMenuClose}
+          PaperProps={{
+            sx: {
+              mt: 1,
+              minWidth: 200,
+              borderRadius: 2,
+              boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+            },
+          }}
+        >
+          <Box sx={{ px: 2, py: 1.5 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+              {user.username}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {user.email}
+            </Typography>
+          </Box>
+          <Divider />
+          <MenuItem
+            onClick={() => {
+              navigate('/profile');
+              handleUserMenuClose();
+            }}
+            sx={{ py: 1.5 }}
+          >
+            <Person sx={{ mr: 2, fontSize: 20 }} />
+            Mi Perfil
+          </MenuItem>
+          <MenuItem onClick={handleUserMenuClose} sx={{ py: 1.5 }}>
+            <Settings sx={{ mr: 2, fontSize: 20 }} />
+            Configuración
+          </MenuItem>
+          <Divider />
+          <MenuItem
+            onClick={handleLogout}
+            sx={{
+              py: 1.5,
+              color: 'error.main',
+              '&:hover': {
+                backgroundColor: 'error.50',
+              },
             }}
           >
-            <Box sx={{ px: 2, py: 1.5, borderBottom: 1, borderColor: 'divider' }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                {user?.username}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {user?.email}
-              </Typography>
-            </Box>
-            
-            <MenuItem onClick={() => handleNavigate('/profile')}>
-              <Person sx={{ mr: 2, color: 'primary.main' }} />
-              <Box>
-                <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                  Mi Perfil
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Gestionar información personal
-                </Typography>
-              </Box>
-            </MenuItem>
-            
-            <MenuItem onClick={() => handleNavigate('/settings')}>
-              <Settings sx={{ mr: 2, color: 'warning.main' }} />
-              <Box>
-                <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                  Configuración
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Preferencias de la aplicación
-                </Typography>
-              </Box>
-            </MenuItem>
-            
-            <Divider sx={{ my: 1 }} />
-            
-            <MenuItem 
-              onClick={handleLogout}
+            <Logout sx={{ mr: 2, fontSize: 20 }} />
+            Cerrar Sesión
+          </MenuItem>
+        </Menu>
+
+        {/* Mobile Menu */}
+        <Menu
+          anchorEl={mobileMenuAnchor}
+          open={Boolean(mobileMenuAnchor)}
+          onClose={handleMobileMenuClose}
+          PaperProps={{
+            sx: {
+              mt: 1,
+              minWidth: 200,
+              borderRadius: 2,
+              boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+            },
+          }}
+        >
+          {navigationItems.map((item) => (
+            <MenuItem
+              key={item.path}
+              onClick={() => {
+                navigate(item.path);
+                handleMobileMenuClose();
+              }}
               sx={{
-                color: 'error.main',
-                '&:hover': {
-                  backgroundColor: alpha(theme.palette.error.main, 0.08),
-                }
+                py: 1.5,
+                backgroundColor: isActive(item.path) ? 'primary.50' : 'transparent',
+                color: isActive(item.path) ? 'primary.main' : 'text.primary',
               }}
             >
-              <Logout sx={{ mr: 2 }} />
-              <Box>
-                <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                  Cerrar Sesión
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Salir de la aplicación
-                </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                {item.badge ? (
+                  <Badge badgeContent={item.badge} color="secondary">
+                    {item.icon}
+                  </Badge>
+                ) : (
+                  item.icon
+                )}
+                {item.label}
               </Box>
             </MenuItem>
-          </Menu>
-        </Box>
+          ))}
+        </Menu>
       </Toolbar>
     </AppBar>
   );
