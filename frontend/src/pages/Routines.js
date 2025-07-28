@@ -746,36 +746,6 @@ const Routines = () => {
               </>
             )}
 
-            {/* Public Routines Tab */}
-            {tabValue === 1 && (
-              <>
-                {filteredPublicRoutines.length > 0 ? (
-                  <Grid container spacing={3}>
-                    {filteredPublicRoutines.map((routine) => (
-                      <Grid item xs={12} sm={6} md={4} key={routine._id}>
-                        <RoutineCard routine={routine} isPublic={true} />
-                      </Grid>
-                    ))}
-                  </Grid>
-                ) : (
-                  <Box sx={{ textAlign: 'center', py: 8 }}>
-                    <Star
-                      sx={{ fontSize: 80, color: 'text.secondary', mb: 3 }}
-                    />
-                    <Typography variant='h5' gutterBottom sx={{ fontWeight: 600 }}>
-                      No hay rutinas públicas disponibles
-                    </Typography>
-                    <Typography
-                      variant='body1'
-                      color='text.secondary'
-                      sx={{ mb: 4, maxWidth: 400, mx: 'auto' }}
-                    >
-                      Las rutinas públicas aparecerán aquí cuando otros usuarios las compartan
-                    </Typography>
-                  </Box>
-                )}
-              </>
-            )}
           </Box>
         </Paper>
 

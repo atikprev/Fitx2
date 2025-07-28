@@ -5,82 +5,35 @@ import {
   Paper,
   Typography,
   Box,
-  Button,
   Card,
   CardContent,
   CardActions,
   Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   IconButton,
-  Fab,
   Divider,
   Stack,
   Alert,
-  Stepper,
-  Step,
-  StepLabel,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
-  Checkbox,
-  FormControlLabel,
 } from '@mui/material';
 import {
-  Add,
-  Edit,
-  Delete,
   FitnessCenter,
   AccessTime,
   TrendingUp,
   Visibility,
-  ArrowBack,
-  ArrowForward,
-  Check,
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [routines, setRoutines] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [openDialog, setOpenDialog] = useState(false);
-  const [selectedRoutine, setSelectedRoutine] = useState(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    category: 'strength',
-    difficulty: 'beginner',
-    estimatedDuration: 30,
-    isPublic: false,
-    exercises: [],
-  });
   const [openExercisesDialog, setOpenExercisesDialog] = useState(false);
   const [exercisesToShow, setExercisesToShow] = useState([]);
   const [availableExercises, setAvailableExercises] = useState([]);
   const [loadingExercises, setLoadingExercises] = useState(true);
-  const [openNewExerciseDialog, setOpenNewExerciseDialog] = useState(false);
-  const [newExerciseData, setNewExerciseData] = useState({
-    name: '',
-    description: '',
-    muscleGroups: [],
-    equipment: [],
-    difficulty: 'beginner',
-    instructions: [],
-    tips: [],
-  });
-  const [activeStep, setActiveStep] = useState(0);
-  const [selectedExercises, setSelectedExercises] = useState([]);
 
   useEffect(() => {
     if (user) {
@@ -115,123 +68,6 @@ const Dashboard = () => {
       setLoadingExercises(false);
     }
   };
-
-  const handleOpenDialog = (routine = null) => {
-    setActiveStep(0);
-    setSelectedExercises([]);
-    
-    if (routine) {
-      setSelectedRoutine(routine);
-      setFormData({
-        name: routine.name,
-        description: routine.description || '',
-        category: routine.category,
-        difficulty: routine.difficulty,
-        estimatedDuration: routine.estimatedDuration,
-        isPublic: routine.isPublic,
-        exercises: routine.exercises || [],
-      });
-      
-      // Set selected exercises for editing
-      const exerciseIds = (routine.exercises || []).map(ex => 
-        typeof ex.exercise === 'object' ? ex.exercise._id : ex.exercise
-      );
-      setSelectedExercises(exerciseIds);
-    } else {
-      setSelectedRoutine(null);
-      setFormData({
-        name: '',
-        description: '',
-        category: 'strength',
-        difficulty: 'beginner',
-        estimatedDuration: 30,
-        isPublic: false,
-        exercises: [],
-      });
-    }
-    setOpenDialog(true);
-  };
-
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-    setSelectedRoutine(null);
-  };
-
-  const handleSubmit = async () => {
-    // Create exercises array from selected exercises
-    const exercisesData = selectedExercises.map((exerciseId, index) => ({
-      exercise: exerciseId,
-      sets: [
-        {
-          reps: 10,
-          weight: 0,
-          duration: 30,
-          rest: 60,
-        }
-      ],
-      order: index,
-    }));
-    
-    const dataToSend = { 
-      ...formData, 
-      exercises: exercisesData 
-    };
-    
-    try {
-      if (selectedRoutine) {
-        await axios.put(`/api/routines/${selectedRoutine._id}`, dataToSend);
-      } else {
-        await axios.post('/api/routines', dataToSend);
-      }
-      fetchRoutines();
-      handleCloseDialog();
-    } catch (error) {
-      console.error('Error saving routine:', error);
-      setError('Error al guardar la rutina');
-    }
-  };
-
-  const handleDelete = async (routineId) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar esta rutina?')) {
-      try {
-        await axios.delete(`/api/routines/${routineId}`);
-        fetchRoutines();
-      } catch (error) {
-        console.error('Error deleting routine:', error);
-        setError('Error al eliminar la rutina');
-      }
-    }
-  };
-
-  const createExercise = async (exerciseData) => {
-    try {
-      const res = await axios.post('/api/exercises', exerciseData);
-      return res.data;
-    } catch (error) {
-      console.error('Error creando ejercicio:', error);
-      throw error;
-    }
-  };
-
-  const handleNext = () => {
-    setActiveStep((prevStep) => prevStep + 1);
-  };
-
-  const handleBack = () => {
-    setActiveStep((prevStep) => prevStep - 1);
-  };
-
-  const handleExerciseToggle = (exerciseId) => {
-    setSelectedExercises(prev => {
-      if (prev.includes(exerciseId)) {
-        return prev.filter(id => id !== exerciseId);
-      } else {
-        return [...prev, exerciseId];
-      }
-    });
-  };
-
-  const steps = ['Información Básica', 'Seleccionar Ejercicios', 'Confirmar'];
 
   const getCategoryColor = (category) => {
     const colors = {
@@ -336,35 +172,16 @@ const Dashboard = () => {
       <Divider />
       
       <CardActions sx={{ p: 2, justifyContent: 'space-between' }}>
-        <Button
+        <IconButton
           size='small'
-          startIcon={<Visibility />}
-          variant='outlined'
           onClick={() => {
             setExercisesToShow(routine.exercises || []);
             setOpenExercisesDialog(true);
           }}
+          color='primary'
         >
-          Ver Ejercicios
-        </Button>
-        
-        <Box>
-          <IconButton
-            size='small'
-            onClick={() => handleOpenDialog(routine)}
-            color='primary'
-            sx={{ mr: 1 }}
-          >
-            <Edit />
-          </IconButton>
-          <IconButton
-            size='small'
-            onClick={() => handleDelete(routine._id)}
-            color='error'
-          >
-            <Delete />
-          </IconButton>
-        </Box>
+          <Visibility />
+        </IconButton>
       </CardActions>
     </Card>
   );
@@ -523,18 +340,9 @@ const Dashboard = () => {
                 Dashboard
               </Typography>
               <Typography variant='h6' color='text.secondary'>
-                Gestiona tus rutinas de entrenamiento
+                Resumen de tus rutinas de entrenamiento
               </Typography>
             </Box>
-            <Button
-              variant='contained'
-              size='large'
-              startIcon={<Add />}
-              onClick={() => handleOpenDialog()}
-              sx={{ px: 4, py: 1.5 }}
-            >
-              Nueva Rutina
-            </Button>
           </Box>
         </Paper>
         {/* Error Alert */}
@@ -546,15 +354,24 @@ const Dashboard = () => {
 
         {/* Routines Section */}
         <Paper sx={{ p: 4, backgroundColor: 'white' }}>
-          <Typography variant='h5' sx={{ fontWeight: 600, mb: 3 }}>
-            Mis Rutinas ({routines.length})
-          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Typography variant='h5' sx={{ fontWeight: 600 }}>
+              Mis Rutinas ({routines.length})
+            </Typography>
+            <Button
+              variant='contained'
+              onClick={() => navigate('/routines')}
+              sx={{ px: 3, py: 1 }}
+            >
+              Ver Todas las Rutinas
+            </Button>
+          </Box>
           
           <Divider sx={{ mb: 3 }} />
           
           {routines.length > 0 ? (
             <Grid container spacing={3}>
-              {routines.map((routine) => (
+              {routines.slice(0, 6).map((routine) => (
                 <Grid item xs={12} sm={6} md={4} key={routine._id}>
                   <RoutineCard routine={routine} />
                 </Grid>
@@ -578,758 +395,84 @@ const Dashboard = () => {
               <Button
                 variant='contained'
                 size='large'
-                startIcon={<Add />}
-                onClick={() => handleOpenDialog()}
+                onClick={() => navigate('/routines')}
                 sx={{ px: 4, py: 1.5 }}
               >
-                Crear Primera Rutina
+                Ir a Rutinas
               </Button>
             </Box>
           )}
         </Paper>
 
-        {/* Floating Action Button */}
-        <Fab
-          color='primary'
-          aria-label='add'
-          sx={{ position: 'fixed', bottom: 24, right: 24 }}
-          onClick={() => handleOpenDialog()}
-        >
-          <Add />
-        </Fab>
-
-        {/* Create/Edit Dialog */}
+        {/* Modal para ver ejercicios */}
         <Dialog
-          open={openDialog}
-          onClose={handleCloseDialog}
-          maxWidth='lg'
+          open={openExercisesDialog}
+          onClose={() => setOpenExercisesDialog(false)}
+          maxWidth='sm'
           fullWidth
-          PaperProps={{
-            sx: { 
-              borderRadius: 3,
-              minHeight: '70vh',
-            }
-          }}
         >
-          <DialogTitle sx={{ pb: 1 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                {selectedRoutine ? 'Editar Rutina' : 'Nueva Rutina'}
-              </Typography>
-              <IconButton onClick={handleCloseDialog} size="small">
-                <Delete />
-              </IconButton>
-            </Box>
-          </DialogTitle>
-          <Divider />
-          
-          {/* Stepper */}
-          <Box sx={{ px: 3, pt: 3 }}>
-            <Stepper activeStep={activeStep} alternativeLabel>
-              {steps.map((label) => (
-                <Step key={label}>
-                  <StepLabel>{label}</StepLabel>
-                </Step>
-              ))}
-            </Stepper>
-          </Box>
-          
-          <DialogContent sx={{ pt: 3 }}>
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label='Nombre de la rutina'
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  required
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label='Descripción'
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  multiline
-                  rows={3}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth>
-                  <InputLabel>Categoría</InputLabel>
-                  <Select
-                    value={formData.category}
-                    onChange={(e) =>
-                      setFormData({ ...formData, category: e.target.value })
-                    }
-                  >
-                    <MenuItem value='strength'>Fuerza</MenuItem>
-                    <MenuItem value='cardio'>Cardio</MenuItem>
-                    <MenuItem value='flexibility'>Flexibilidad</MenuItem>
-                    <MenuItem value='sports'>Deportes</MenuItem>
-                    <MenuItem value='rehabilitation'>Rehabilitación</MenuItem>
-                    <MenuItem value='weight_loss'>Pérdida de peso</MenuItem>
-                    <MenuItem value='muscle_gain'>Ganancia muscular</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth>
-                  <InputLabel>Dificultad</InputLabel>
-                  <Select
-                    value={formData.difficulty}
-                    onChange={(e) =>
-                      setFormData({ ...formData, difficulty: e.target.value })
-                    }
-                  >
-                    <MenuItem value='beginner'>Principiante</MenuItem>
-                    <MenuItem value='intermediate'>Intermedio</MenuItem>
-                    <MenuItem value='advanced'>Avanzado</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label='Duración estimada (min)'
-                  type='number'
-                  value={formData.estimatedDuration}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      estimatedDuration: parseInt(e.target.value),
-                    })
-                  }
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <FormControl fullWidth>
-                  <InputLabel id='exercises-label'>Ejercicios</InputLabel>
-                  <Select
-                    labelId='exercises-label'
-                    multiple
-                    value={formData.exercises.map((ex) =>
-                      typeof ex === 'string' ? ex : ex.exercise
-                    )}
-                    onChange={async (e) => {
-                      const selected = e.target.value;
-                      if (selected.includes('nuevo')) {
-                        setOpenNewExerciseDialog(true);
-                        setFormData((prev) => ({
-                          ...prev,
-                          exercises: prev.exercises.filter(
-                            (ex) => ex !== 'nuevo'
-                          ),
-                        }));
-                        return;
-                      }
-                      setFormData((prev) => ({
-                        ...prev,
-                        exercises: selected.map((exId, idx) => {
-                          const found = prev.exercises.find((ex) =>
-                            typeof ex === 'string'
-                              ? ex === exId
-                              : ex.exercise === exId
-                          );
-                          return found
-                            ? found
-                            : {
-                                exercise: exId,
-                                sets: [
-                                  {
-                                    reps: '',
-                                    weight: '',
-                                    duration: '',
-                                    rest: '',
-                                  },
-                                ],
-                              };
-                        }),
-                      }));
-                    }}
-                    renderValue={(selected) =>
-                      availableExercises
-                        .filter((ex) => selected.includes(ex._id))
-                        .map((ex) => ex.name)
-                        .concat(
-                          selected.includes('nuevo') ? ['(Nuevo ejercicio)'] : []
-                        )
-                        .join(', ')
-                    }
-                    disabled={loadingExercises}
-                  >
-                    {loadingExercises ? (
-                      <MenuItem disabled>Cargando ejercicios...</MenuItem>
-                    ) : (
-                      [
-                        ...availableExercises.map((ex) => (
-                          <MenuItem key={ex._id} value={ex._id}>
-                            {ex.name}
-                          </MenuItem>
-                        )),
-                        <MenuItem key='nuevo' value='nuevo'>
-                          <Button
-                            variant='outlined'
-                            color='primary'
-                            fullWidth
-                          >
-                            + Crear nuevo ejercicio
-                          </Button>
-                        </MenuItem>,
-                      ]
-                    )}
-                  </Select>
-                </FormControl>
-              </Grid>
-              {formData.exercises.length > 0 && (
-                <Grid item xs={12}>
-                  <Typography variant='h6' sx={{ mt: 2, mb: 2, fontWeight: 600 }}>
-                    Configuración de Sets
-                  </Typography>
-                  <Divider sx={{ mb: 2 }} />
-                  {formData.exercises.map((ex, idx) => {
-                    const exId = typeof ex === 'string' ? ex : ex.exercise;
-                    const exObj = availableExercises.find((e) => e._id === exId);
-                    const sets =
-                      (typeof ex === 'string'
-                        ? [{ reps: '', weight: '', duration: '', rest: '' }]
-                        : ex.sets) || [];
-                    return (
-                      <Paper
-                        key={exId}
-                        sx={{
-                          mb: 3,
-                          p: 3,
-                          border: '1px solid #e0e0e0',
-                        }}
-                      >
-                        <Box
-                          sx={{ display: 'flex', alignItems: 'center', mb: 2 }}
+          <DialogTitle>Ejercicios de la rutina</DialogTitle>
+          <DialogContent>
+            {exercisesToShow && exercisesToShow.length > 0 ? (
+              <Box>
+                {exercisesToShow.map((ex, idx) => {
+                  const exObj =
+                    ex.exercise && typeof ex.exercise === 'object'
+                      ? ex.exercise
+                      : availableExercises.find(
+                          (e) => e._id === (ex.exercise?._id || ex.exercise)
+                        );
+                  return (
+                    <Box
+                      key={idx}
+                      sx={{
+                        mb: 2,
+                        p: 1,
+                        border: '1px solid #eee',
+                        borderRadius: 1,
+                      }}
+                    >
+                      <Typography variant='subtitle1'>
+                        <b>{exObj ? exObj.name : `Ejercicio ${idx + 1}`}</b>
+                      </Typography>
+                      {exObj && exObj.description && (
+                        <Typography
+                          variant='body2'
+                          color='text.secondary'
                         >
-                          <Typography
-                            variant='subtitle1'
-                            sx={{ flexGrow: 1, fontWeight: 600 }}
-                          >
-                            {exObj ? exObj.name : 'Ejercicio'}
+                          {exObj.description}
+                        </Typography>
+                      )}
+                      {ex.sets && ex.sets.length > 0 && (
+                        <Box sx={{ mt: 1 }}>
+                          <Typography variant='body2'>
+                            <b>Sets:</b>
                           </Typography>
-                          <Button
-                            size='small'
-                            color='error'
-                            variant='outlined'
-                            onClick={() => {
-                              setFormData((prev) => ({
-                                ...prev,
-                                exercises: prev.exercises.filter(
-                                  (_, i) => i !== idx
-                                ),
-                              }));
-                            }}
-                          >
-                            Eliminar ejercicio
-                          </Button>
-                        </Box>
-                        <Stack spacing={2}>
-                          {sets.map((set, sidx) => (
-                            <Box
+                          {ex.sets.map((set, sidx) => (
+                            <Typography
                               key={sidx}
-                              sx={{
-                                display: 'flex',
-                                gap: 2,
-                                alignItems: 'center',
-                                p: 2,
-                                backgroundColor: 'grey.50',
-                                borderRadius: 1,
-                              }}
+                              variant='body2'
+                              sx={{ ml: 2 }}
                             >
-                              <Typography variant="body2" sx={{ minWidth: 60 }}>
-                                Set {sidx + 1}:
-                              </Typography>
-                              <TextField
-                                label='Reps'
-                                type='number'
-                                size='small'
-                                value={set.reps}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  setFormData((prev) => {
-                                    const newExercises = [...prev.exercises];
-                                    if (typeof newExercises[idx] === 'string')
-                                      newExercises[idx] = {
-                                        exercise: exId,
-                                        sets: [
-                                          {
-                                            reps: '',
-                                            weight: '',
-                                            duration: '',
-                                            rest: '',
-                                          },
-                                        ],
-                                      };
-                                    newExercises[idx].sets[sidx].reps = val;
-                                    return { ...prev, exercises: newExercises };
-                                  });
-                                }}
-                                sx={{ width: 80 }}
-                              />
-                              <TextField
-                                label='Peso (kg)'
-                                type='number'
-                                size='small'
-                                value={set.weight}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  setFormData((prev) => {
-                                    const newExercises = [...prev.exercises];
-                                    if (typeof newExercises[idx] === 'string')
-                                      newExercises[idx] = {
-                                        exercise: exId,
-                                        sets: [
-                                          {
-                                            reps: '',
-                                            weight: '',
-                                            duration: '',
-                                            rest: '',
-                                          },
-                                        ],
-                                      };
-                                    newExercises[idx].sets[sidx].weight = val;
-                                    return { ...prev, exercises: newExercises };
-                                  });
-                                }}
-                                sx={{ width: 100 }}
-                              />
-                              <TextField
-                                label='Duración (seg)'
-                                type='number'
-                                size='small'
-                                value={set.duration}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  setFormData((prev) => {
-                                    const newExercises = [...prev.exercises];
-                                    if (typeof newExercises[idx] === 'string')
-                                      newExercises[idx] = {
-                                        exercise: exId,
-                                        sets: [
-                                          {
-                                            reps: '',
-                                            weight: '',
-                                            duration: '',
-                                            rest: '',
-                                          },
-                                        ],
-                                      };
-                                    newExercises[idx].sets[sidx].duration = val;
-                                    return { ...prev, exercises: newExercises };
-                                  });
-                                }}
-                                sx={{ width: 120 }}
-                              />
-                              <TextField
-                                label='Descanso (seg)'
-                                type='number'
-                                size='small'
-                                value={set.rest}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  setFormData((prev) => {
-                                    const newExercises = [...prev.exercises];
-                                    if (typeof newExercises[idx] === 'string')
-                                      newExercises[idx] = {
-                                        exercise: exId,
-                                        sets: [
-                                          {
-                                            reps: '',
-                                            weight: '',
-                                            duration: '',
-                                            rest: '',
-                                          },
-                                        ],
-                                      };
-                                    newExercises[idx].sets[sidx].rest = val;
-                                    return { ...prev, exercises: newExercises };
-                                  });
-                                }}
-                                sx={{ width: 120 }}
-                              />
-                              <Button
-                                size='small'
-                                color='error'
-                                onClick={() => {
-                                  setFormData((prev) => {
-                                    const newExercises = [...prev.exercises];
-                                    if (typeof newExercises[idx] === 'string')
-                                      newExercises[idx] = {
-                                        exercise: exId,
-                                        sets: [
-                                          {
-                                            reps: '',
-                                            weight: '',
-                                            duration: '',
-                                            rest: '',
-                                          },
-                                        ],
-                                      };
-                                    newExercises[idx].sets.splice(sidx, 1);
-                                    if (newExercises[idx].sets.length === 0)
-                                      newExercises[idx].sets.push({
-                                        reps: '',
-                                        weight: '',
-                                        duration: '',
-                                        rest: '',
-                                      });
-                                    return { ...prev, exercises: newExercises };
-                                  });
-                                }}
-                              >
-                                Eliminar
-                              </Button>
-                              <Button
-                                size='small'
-                                color='info'
-                                onClick={() => {
-                                  setFormData((prev) => {
-                                    const newExercises = [...prev.exercises];
-                                    if (typeof newExercises[idx] === 'string')
-                                      newExercises[idx] = {
-                                        exercise: exId,
-                                        sets: [
-                                          {
-                                            reps: '',
-                                            weight: '',
-                                            duration: '',
-                                            rest: '',
-                                          },
-                                        ],
-                                      };
-                                    const setToCopy = {
-                                      ...newExercises[idx].sets[sidx],
-                                    };
-                                    newExercises[idx].sets.splice(
-                                      sidx + 1,
-                                      0,
-                                      setToCopy
-                                    );
-                                    return { ...prev, exercises: newExercises };
-                                  });
-                                }}
-                              >
-                                Duplicar
-                              </Button>
-                            </Box>
+                              {`Set ${sidx + 1}: ${set.reps || 0} reps, ${
+                                set.weight || 0
+                              } kg, ${set.duration || 0} seg, descanso ${
+                                set.rest || 0
+                              } seg`}
+                            </Typography>
                           ))}
-                          <Button
-                            size='small'
-                            variant='outlined'
-                            onClick={() => {
-                              setFormData((prev) => {
-                                const newExercises = [...prev.exercises];
-                                if (typeof newExercises[idx] === 'string')
-                                  newExercises[idx] = {
-                                    exercise: exId,
-                                    sets: [
-                                      {
-                                        reps: '',
-                                        weight: '',
-                                        duration: '',
-                                        rest: '',
-                                      },
-                                    ],
-                                  };
-                                newExercises[idx].sets.push({
-                                  reps: '',
-                                  weight: '',
-                                  duration: '',
-                                  rest: '',
-                                });
-                                return { ...prev, exercises: newExercises };
-                              });
-                            }}
-                            sx={{ alignSelf: 'flex-start' }}
-                          >
-                            + Agregar set
-                          </Button>
-                        </Stack>
-                      </Paper>
-                    );
-                  })}
-                </List>
+                        </Box>
+                      )}
+                    </Box>
+                  );
+                })}
               </Box>
+            ) : (
+              <Typography>No hay ejercicios en esta rutina.</Typography>
             )}
           </DialogContent>
-          
-          <Divider />
-          
-          <DialogActions sx={{ p: 3, justifyContent: 'space-between' }}>
-            <Button onClick={handleCloseDialog} size="large">
-              Cancelar
-            </Button>
-            
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              {activeStep > 0 && (
-                <Button
-                  onClick={handleBack}
-                  startIcon={<ArrowBack />}
-                  size="large"
-                >
-                  Anterior
-                </Button>
-              )}
-              
-              {activeStep < steps.length - 1 ? (
-                <Button
-                  onClick={handleNext}
-                  variant="contained"
-                  endIcon={<ArrowForward />}
-                  size="large"
-                  disabled={
-                    (activeStep === 0 && !formData.name) ||
-                    (activeStep === 1 && selectedExercises.length === 0)
-                  }
-                >
-                  Siguiente
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleSubmit}
-                  variant="contained"
-                  startIcon={<Check />}
-                  size="large"
-                  sx={{ px: 4 }}
-                >
-                  {selectedRoutine ? 'Actualizar Rutina' : 'Crear Rutina'}
-                </Button>
-              )}
-            </Box>
-          </DialogActions>
-        </Dialog>
-
-        {/* Modal para ver ejercicios */}
-        <ExercisesDialog />
-
-        {/* Modal para crear nuevo ejercicio */}
-        <Dialog
-          open={openNewExerciseDialog}
-          onClose={() => setOpenNewExerciseDialog(false)}
-          maxWidth='md'
-          fullWidth
-          PaperProps={{
-            sx: { borderRadius: 3 }
-          }}
-        >
-          <DialogTitle sx={{ pb: 1 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Typography variant="h5" sx={{ fontWeight: 600, color: 'primary.main' }}>
-                Crear Nuevo Ejercicio
-              </Typography>
-              <IconButton onClick={() => setOpenNewExerciseDialog(false)} size="small">
-                <Delete />
-              </IconButton>
-            </Box>
-          </DialogTitle>
-          <Divider />
-          <DialogContent sx={{ pt: 3 }}>
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <TextField
-                  label='Nombre del ejercicio'
-                  fullWidth
-                  value={newExerciseData.name}
-                  onChange={(e) =>
-                    setNewExerciseData({ ...newExerciseData, name: e.target.value })
-                  }
-                  required
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2,
-                    },
-                  }}
-                />
-              </Grid>
-              
-              <Grid item xs={12}>
-                <TextField
-                  label='Descripción'
-                  fullWidth
-                  value={newExerciseData.description}
-                  onChange={(e) =>
-                    setNewExerciseData({
-                      ...newExerciseData,
-                      description: e.target.value,
-                    })
-                  }
-                  multiline
-                  rows={3}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2,
-                    },
-                  }}
-                />
-              </Grid>
-              
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth>
-                  <InputLabel>Grupos musculares</InputLabel>
-                  <Select
-                    multiple
-                    value={newExerciseData.muscleGroups}
-                    onChange={(e) =>
-                      setNewExerciseData({
-                        ...newExerciseData,
-                        muscleGroups: e.target.value,
-                      })
-                    }
-                    sx={{ borderRadius: 2 }}
-                    renderValue={(selected) => (
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {selected.map((value) => (
-                          <Chip key={value} label={value} size="small" />
-                        ))}
-                      </Box>
-                    )}
-                  >
-                    <MenuItem value='chest'>Pecho</MenuItem>
-                    <MenuItem value='back'>Espalda</MenuItem>
-                    <MenuItem value='shoulders'>Hombros</MenuItem>
-                    <MenuItem value='arms'>Brazos</MenuItem>
-                    <MenuItem value='legs'>Piernas</MenuItem>
-                    <MenuItem value='core'>Core</MenuItem>
-                    <MenuItem value='cardio'>Cardio</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth>
-                  <InputLabel>Equipo necesario</InputLabel>
-                  <Select
-                    multiple
-                    value={newExerciseData.equipment}
-                    onChange={(e) =>
-                      setNewExerciseData({
-                        ...newExerciseData,
-                        equipment: e.target.value,
-                      })
-                    }
-                    sx={{ borderRadius: 2 }}
-                    renderValue={(selected) => (
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {selected.map((value) => (
-                          <Chip key={value} label={value} size="small" />
-                        ))}
-                      </Box>
-                    )}
-                  >
-                    <MenuItem value='bodyweight'>Peso corporal</MenuItem>
-                    <MenuItem value='dumbbells'>Mancuernas</MenuItem>
-                    <MenuItem value='barbell'>Barra</MenuItem>
-                    <MenuItem value='machine'>Máquina</MenuItem>
-                    <MenuItem value='cable'>Cable</MenuItem>
-                    <MenuItem value='resistance_band'>Banda de resistencia</MenuItem>
-                    <MenuItem value='kettlebell'>Kettlebell</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              
-              <Grid item xs={12}>
-                <FormControl fullWidth>
-                  <InputLabel>Dificultad</InputLabel>
-                  <Select
-                    value={newExerciseData.difficulty}
-                    onChange={(e) =>
-                      setNewExerciseData({
-                        ...newExerciseData,
-                        difficulty: e.target.value,
-                      })
-                    }
-                    sx={{ borderRadius: 2 }}
-                  >
-                    <MenuItem value='beginner'>Principiante</MenuItem>
-                    <MenuItem value='intermediate'>Intermedio</MenuItem>
-                    <MenuItem value='advanced'>Avanzado</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              
-              <Grid item xs={12}>
-                <TextField
-                  label='Instrucciones (separadas por coma)'
-                  fullWidth
-                  value={newExerciseData.instructions.join(', ')}
-                  onChange={(e) =>
-                    setNewExerciseData({
-                      ...newExerciseData,
-                      instructions: e.target.value.split(',').map((i) => i.trim()).filter(i => i),
-                    })
-                  }
-                  multiline
-                  rows={2}
-                  placeholder="Ej: Mantén la espalda recta, Controla el movimiento, Respira correctamente"
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2,
-                    },
-                  }}
-                />
-              </Grid>
-              
-              <Grid item xs={12}>
-                <TextField
-                  label='Tips adicionales (separados por coma)'
-                  fullWidth
-                  value={newExerciseData.tips.join(', ')}
-                  onChange={(e) =>
-                    setNewExerciseData({
-                      ...newExerciseData,
-                      tips: e.target.value.split(',').map((i) => i.trim()).filter(i => i),
-                    })
-                  }
-                  multiline
-                  rows={2}
-                  placeholder="Ej: Calienta antes de empezar, Aumenta peso gradualmente"
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2,
-                    },
-                  }}
-                />
-              </Grid>
-            </Grid>
-          </DialogContent>
-          <Divider />
-          <DialogActions sx={{ p: 3 }}>
-            <Button 
-              onClick={() => {
-                setOpenNewExerciseDialog(false);
-                setNewExerciseData({
-                  name: '',
-                  description: '',
-                  muscleGroups: [],
-                  equipment: [],
-                  difficulty: 'beginner',
-                  instructions: [],
-                  tips: [],
-                });
-              }} 
-              size="large"
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleCreateNewExercise}
-              variant='contained'
-              size="large"
-              sx={{ px: 4 }}
-              disabled={!newExerciseData.name}
-            >
-              Crear Ejercicio
-            </Button>
+          <DialogActions>
+            <Button onClick={() => setOpenExercisesDialog(false)}>Cerrar</Button>
           </DialogActions>
         </Dialog>
       </Container>
