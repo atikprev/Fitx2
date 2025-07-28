@@ -34,6 +34,7 @@ import {
   Bar,
 } from 'recharts';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const Dashboard = () => {
@@ -156,6 +157,7 @@ const Dashboard = () => {
             alignItems: 'center',
             mb: 1,
           }}
+          color='primary'
         >
           <Typography variant='body2'>
             {goal.currentValue} / {goal.targetValue} {goal.unit}
