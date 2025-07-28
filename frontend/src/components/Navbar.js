@@ -55,7 +55,6 @@ const Navbar = () => {
   const handleLogout = () => {
     logout();
     handleUserMenuClose();
-    navigate('/login');
   };
 
   const navigationItems = [
